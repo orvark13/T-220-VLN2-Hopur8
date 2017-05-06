@@ -12,6 +12,9 @@ namespace ode.Data
     {
         public static void Initialize(ApplicationDbContext context)
         {
+            // FIXME, turning this off for now.
+            return;
+
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
@@ -51,53 +54,6 @@ namespace ode.Data
             userJane.PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(userJane, "h8john");
             context.Users.Add(userJane);
 
-            /*var users = new ApplicationUser[]
-            {
-                new ApplicationUser {
-                    UserName = "orvark13@ru.is",
-                    NormalizedUserName = "ORVARK13@RU.IS",
-                    Email = "orvark13@ru.is",
-                    NormalizedEmail = "ORVARK13@RU.IS",
-                    EmailConfirmed = true,
-                    LockoutEnabled = false,
-                    SecurityStamp = Guid.NewGuid().ToString()               
-                },
-                new ApplicationUser {
-                    UserName = "John Smith",
-                    NormalizedUserName = "JOHN SMITH",
-                    Email = "john@thesmiths.com",
-                    NormalizedEmail = "JOHN@THESMITHS.COM",
-                    EmailConfirmed = true,
-                    LockoutEnabled = false,
-                    SecurityStamp = Guid.NewGuid().ToString()               
-                },
-                new ApplicationUser {
-                    UserName = "Jane Smith",
-                    NormalizedUserName = "JANE SMITH",
-                    Email = "jane@thesmiths.com",
-                    NormalizedEmail = "JANE@THESMITHS.COM",
-                    EmailConfirmed = true,
-                    LockoutEnabled = false,
-                    SecurityStamp = Guid.NewGuid().ToString()               
-                }
-            };
-            
-            // TODO refactor this into a simple new users list
-
-            foreach (ApplicationUser u in users)
-            {
-                var exists = context.Users.FirstOrDefault(p => p.NormalizedUserName == u.NormalizedUserName);
-                if (exists == null)
-                {
-                    u.PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(u, "TODO");
-                    context.Users.Add(u);
-                }
-            }*/
-
-            /*if (context.Projects.Any())
-            {
-                return;
-            }*/
 
             var nodes = new Node[]
             {
