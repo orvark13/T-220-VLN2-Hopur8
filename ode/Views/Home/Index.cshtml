@@ -93,21 +93,10 @@
             var name = input.val();
 
             if (name != input.prop("defaultValue")) {
-                /*$.ajax({
-                    type: "POST",
-                    url: "/Home/Post/" + pid,
-                    data: JSON.stringify({ 'name': name}),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function(data) {alert(data);},
-                    failure: function(errMsg) {
-                        alert(errMsg);
-                    }
-                });*/
-
                 $.post("/Home/Post/" + pid, {'name': name})
                     .done(function (r) {
-                        alert('svar ' + r);
+                        // TODO use validated name from server for update
+                        //alert('svar ' + r);
                     });
             }
 
@@ -126,10 +115,10 @@
             var sharingSpan = p.find('span.sharing').first();
 
             sharing.select2({
-                //placeholder: "Placeholder",
                 minimumInputLength: 1,
                 allowClear: false,
                 multiple: true,
+                closeOnSelect: true,
                 formatInputTooShort: function () {return '';},
                 ajax: {
                     url: "/Home/MatchingUsers/",
@@ -163,12 +152,23 @@
                 console.log(selectionIDs);
                 console.log(selections.join(", "));
 
-                //$('this').select2('destroy');
+                // FIXME persist changed sharing in db
+                $.ajax({
+                    type: "POST",
+                    url: "/Home/Post/" + pid,
+                    data: JSON.stringify({ 'sharing': selectionIDs}),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function(data) {alert(data);},
+                    failure: function(errMsg) {
+                        alert(errMsg);
+                    }
+                });
 
                 setTimeout(function(){
                     $('this').select2('destroy');
-                    $('.select2').remove();
-                    $('.select2-container').hide();
+                    $('.project' + pid + ' .select2').remove();
+                    $('.project' + pid + ' .select2-container').hide();
                 }, 50);
 
                 p.find('.editSharing').removeClass('hidden');

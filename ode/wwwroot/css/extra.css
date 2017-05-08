@@ -1,10 +1,18 @@
 
-ul li button {
+div.list-group-item button {
     display: none !important;
 }
 
-ul li:hover button:not(.hidden) {
+div.list-group-item:hover button:not(.hidden) {
     display: inline-block !important;
+}
+
+.list-group-item h4 {
+    height: 1.5em;
+}
+
+.list-group-item p {
+    line-height: 1.7em;
 }
 
 .select2-selection, .select2-results, .select2-container, .select2-dropdown {
