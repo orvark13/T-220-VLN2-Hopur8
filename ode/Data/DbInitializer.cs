@@ -60,7 +60,7 @@ namespace ode.Data
                 new Node {
                     Name = "README.txt",
                     ParentNodeID = -1,
-                    ProjectID = 0,
+                    ProjectID = 1,
                     CreatedByUserID = userOrvar.Id,
                     Type = NodeType.File,
                     CreatedDate = DateTime.Parse("2017-01-01")
@@ -68,7 +68,7 @@ namespace ode.Data
                 new Node {
                     Name = "README.txt",
                     ParentNodeID = -1,
-                    ProjectID = 1,
+                    ProjectID = 2,
                     CreatedByUserID = userOrvar.Id,
                     Type = NodeType.File,
                     CreatedDate = DateTime.Parse("2017-05-05")
@@ -83,7 +83,7 @@ namespace ode.Data
             var fileRevisions = new FileRevision[]
             {
                 new FileRevision {
-                    NodeID = nodes[0].ID,
+                    NodeID = 1, //nodes[0].ID,
                     Description = "Initial version",
                     Contents = System.Text.Encoding.ASCII.GetBytes("Hello World"),
                     CreatedByUserID = userOrvar.Id,
@@ -100,14 +100,14 @@ namespace ode.Data
             {
                 new Project {
                     Name = "Default",
-                    MainNodeID = 0,
+                    MainNodeID = 1,
                     CreatedByUserID = userOrvar.Id,
                     Template = true,
                     CreatedDate = DateTime.Parse("2017-01-01")
                 },
                 new Project { 
                     Name = "Testing",
-                    MainNodeID = 1,
+                    MainNodeID = 2,
                     CreatedByUserID = userOrvar.Id,
                     Template = false,
                     CreatedDate = DateTime.Parse("2017-05-05")
@@ -122,15 +122,15 @@ namespace ode.Data
             var sharings = new Sharing[]
             {
                 new Sharing {
-                    ProjectID = projects[0].ID,
+                    ProjectID = 1, //projects[0].ID,
                     UserID = userJohn.Id
                 },
                 new Sharing {
-                    ProjectID = projects[0].ID,
+                    ProjectID = 1, //projects[0].ID,
                     UserID = userJane.Id
                 },
                 new Sharing {
-                    ProjectID = projects[1].ID,
+                    ProjectID = 2, //projects[1].ID,
                     UserID = userJane.Id
                 },
             };

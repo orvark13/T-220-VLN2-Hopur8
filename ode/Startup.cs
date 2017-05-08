@@ -81,7 +81,7 @@ namespace ode
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}/{nid?}");
             });
 
             // Seed the Database

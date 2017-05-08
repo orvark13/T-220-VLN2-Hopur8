@@ -1,5 +1,4 @@
-﻿@*model IEnumerable<ode.Models.Entities.Project>*@
-@model List<ode.Models.ProjectViewModel>
+﻿@model ode.Models.ProjectsPageViewModel
 
 @{
     ViewData["Title"] = "Projects";
@@ -7,15 +6,199 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<p>Projects page</p>
+<p>Projects:</p>
 
+<div class="list-group">
+@foreach (var project in Model.Projects) {
+    <div class="project@(project.ID) list-group-item">
+        <a class="btn btn-primary pull-right" asp-action="Open" asp-route-id="@project.ID">Open</a>
+        <h4 class="list-group-item-heading">
+        <span class="list-group-item-heading">@Html.DisplayFor(modelItem => project.Name)</span>
+        <button class="editName btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil
+"></span></button>
+        <button class="updateName btn btn-primary btn-xs hidden" data-pid="@project.ID">OK</button>
+        <small>
+        @Html.DisplayFor(modelItem => project.CreatedByUser.Name)
+        @Html.DisplayFor(modelItem => project.CreatedDate)
+        </small>
+        </h4>
+        <p class="list-group-item-text sharedWith sharedWith@(project.ID)">
+            <span class="text-muted">Shared with:</span><br>
+            @if(project.SharedWith.Any()) {
+                <span class="sharing">
+                @foreach (var user in project.SharedWith) {
+                    <span class="select2-selection__choice">@Html.DisplayFor(modelItem => user.Name)</span>
+                }
+                </span>
+            }
+            else
+            {
+                <span class="sharing"><em>None.</em></span>
+            }
+            <select class="sharing hidden" data-pid="@project.ID" multiple="multiple">
+            @foreach (var user in project.SharedWith) {
+                <option value="@(user.ID)" selected="selected">@Html.DisplayFor(modelItem => user.Name)</option>
+            }
+            </select>
+            <button class="editSharing btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil
+"></span></button>
+        </p>
+    </div>
+}
+</div>
+
+<!--
+<p>Templates:</p>
 <ul>
-@foreach (var item in Model) {
+@foreach (var template in Model.Templates) {
     <li>
-        @Html.DisplayFor(modelItem => item.Name)
-        @Html.DisplayFor(modelItem => item.MainNodeID)
-        @Html.DisplayFor(modelItem => item.CreatedByUserID)
-        @Html.DisplayFor(modelItem => item.CreatedDate)
+        @Html.DisplayFor(modelItem => template.Name)
+        @Html.DisplayFor(modelItem => template.CreatedByUser.Name)
+        @Html.DisplayFor(modelItem => template.CreatedDate)
+        <a asp-action="Sharing" asp-route-id="@template.ID">Sharing</a>
     </li>
 }
 </ul>
+-->
+
+@section scripts
+{
+    <script>
+        $(document).on("click", ".editName", function () {
+            var pid = $(this).attr('data-pid');
+            var p = $('.project' + pid);
+
+            p.find('.editName').addClass('hidden');
+            p.find('.updateName').removeClass('hidden');
+
+            var span = p.find('span').first();
+            var input = $('<input />', {
+                'type': 'text',
+                'value': span.text(),
+            });
+            span.replaceWith(input);
+            input.focus().select();
+            input.blur(function () {
+                p.find('.updateName').trigger('click');
+            });
+        });
+
+        $(document).on("click", ".updateName", function () {
+            var pid = $(this).attr('data-pid');
+            var p = $('.project' + pid);
+
+            p.find('.updateName').prop('disabled', true);
+
+            var input = p.find('input').first();
+            var name = input.val();
+
+            if (name != input.prop("defaultValue")) {
+                /*$.ajax({
+                    type: "POST",
+                    url: "/Home/Post/" + pid,
+                    data: JSON.stringify({ 'name': name}),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function(data) {alert(data);},
+                    failure: function(errMsg) {
+                        alert(errMsg);
+                    }
+                });*/
+
+                $.post("/Home/Post/" + pid, {'name': name})
+                    .done(function (r) {
+                        alert('svar ' + r);
+                    });
+            }
+
+            var span = $('<span>' + name + '</span>');
+            input.replaceWith(span);
+
+            p.find('.updateName').prop('disabled', false).addClass('hidden');
+            p.find('.editName').removeClass('hidden');
+        });
+
+        $(document).on("click", ".editSharing", function () {
+            var pid = $(this).attr('data-pid');
+            var p = $('.project' + pid);
+            
+            var sharing = p.find('select.sharing').first();
+            var sharingSpan = p.find('span.sharing').first();
+
+            sharing.select2({
+                //placeholder: "Placeholder",
+                minimumInputLength: 1,
+                allowClear: false,
+                multiple: true,
+                formatInputTooShort: function () {return '';},
+                ajax: {
+                    url: "/Home/MatchingUsers/",
+                    dataType: 'json',
+                    delay: 100,
+                    processResults: function (data, params) {
+                        // TODO remove existing
+                        return {
+                            results: data.items
+                        }
+                    }
+                },
+                formatResult: function (item) {return item.text;},
+                formatSelection: function (item) {return item.text;}
+            });
+            sharing.focus();
+            sharingSpan.addClass("hidden");
+
+            sharing.on("change", function(e) {
+
+                var selectedOptions = p.find('select option:selected');
+                var selections = $.map(selectedOptions, function (el, i) {return $(el).text();});
+                var selectionIDs = $.map(selectedOptions, function (el, i) {return $(el).val();});
+                if (selections.length) {
+                    sharingSpan.text(selections.join(", "));
+                } else {
+                    sharingSpan.html("<em>None.</em>");
+                }
+                sharingSpan.removeClass('hidden');
+                console.log(selections);
+                console.log(selectionIDs);
+                console.log(selections.join(", "));
+
+                //$('this').select2('destroy');
+
+                setTimeout(function(){
+                    $('this').select2('destroy');
+                    $('.select2').remove();
+                    $('.select2-container').hide();
+                }, 50);
+
+                p.find('.editSharing').removeClass('hidden');
+                //p.find('.updateSharing').addClass('hidden');
+            });
+
+            p.find('.editSharing').addClass('hidden');
+        });
+
+        $(document).on("click", ".updateSharing", function () {
+            var pid = $(this).attr('data-pid');
+            var p = $('.project' + pid);
+
+            var sharingSpan = p.find('span.sharing').first();
+
+            p.find('.editSharing').prop('disabled', true);
+        });
+
+        $(document).on("click", ".updateSharing", function () {
+            var pid = $(this).attr('data-pid');
+            var p = $('.project' + pid);
+
+            var sharingSpan = p.find('span.sharing').first();
+
+            p.find('.editSharing').prop('disabled', true);
+        });
+
+
+        $(document).ready(function () {
+            
+        });
+    </script>
+}

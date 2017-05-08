@@ -23,18 +23,16 @@ namespace ode.Models.Entities
 
         public string Name { get; set; }
 
-        [Display(Name = "Parent")]
         public int ParentNodeID { get; set; } // Parent folder
 
         public int ProjectID { get; set; }
 
-        [MaxLength(450), Display(Name = "Created By")]
+        [MaxLength(450)]
         public string CreatedByUserID { get; set; } // CreatedBy
 
         public NodeType Type { get; set; }
 
         //TODO MimeTypeID ...
-
         public DateTime CreatedDate { get; set; }
     }
 }

@@ -22,7 +22,7 @@ namespace ode.Models.Entities
 
         public bool Template { get; set; }
 
-        [MaxLength(450), Display(Name = "Created By")]
+        [MaxLength(450)]
         public string CreatedByUserID { get; set; } // CreatedBy
 
         //public ICollection<ApplicationUser> SharedWith { get; set; }

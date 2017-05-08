@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using ode.Data;
+using ode.Models.Entities;
 
 namespace ode.Data.Migrations
 {
@@ -173,6 +174,88 @@ namespace ode.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("ode.Models.Entities.FileRevision", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<byte[]>("Contents")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("CreatedByUserID")
+                        .HasMaxLength(450);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Description");
+
+                    b.Property<int>("NodeID");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("FileRevisions");
+                });
+
+            modelBuilder.Entity("ode.Models.Entities.Node", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CreatedByUserID")
+                        .HasMaxLength(450);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("ParentNodeID");
+
+                    b.Property<int>("ProjectID");
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Nodes");
+                });
+
+            modelBuilder.Entity("ode.Models.Entities.Project", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<string>("CreatedByUserID")
+                        .HasMaxLength(450);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<int>("MainNodeID");
+
+                    b.Property<string>("Name");
+
+                    b.Property<bool>("Template");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("ode.Models.Entities.Sharing", b =>
+                {
+                    b.Property<int>("ProjectID");
+
+                    b.Property<string>("UserID")
+                        .HasMaxLength(450);
+
+                    b.HasKey("ProjectID", "UserID");
+
+                    b.ToTable("ProjectSharing");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole")
@@ -208,6 +291,13 @@ namespace ode.Data.Migrations
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("ode.Models.Entities.Project", b =>
+                {
+                    b.HasOne("ode.Models.ApplicationUser")
+                        .WithMany("Projects")
+                        .HasForeignKey("ApplicationUserId");
                 });
         }
     }

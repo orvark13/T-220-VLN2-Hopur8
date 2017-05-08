@@ -15,7 +15,7 @@ namespace ode.Data
             : base(options)
         {
         }
-
+        
         public DbSet<Sharing> Sharings { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<FileRevision> FileRevisions { get; set; }
