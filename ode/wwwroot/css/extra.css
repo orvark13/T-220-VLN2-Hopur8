@@ -28,3 +28,25 @@ select.sharing {
 .select2-container--default .select2-selection--multiple {
     border: 1px solid #aaa !important;
 }
+
+#editor { 
+    position: absolute;
+    top: 51px;
+    left: 0px;
+    bottom: 0px;
+    right: 50%;
+    width: 50%;
+}
+
+#preview {
+    position: absolute;
+    top: 51px;
+    left: 50%;
+    bottom: 0px;
+    right: 0px;
+    width: 50%;
+    background-color: white;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding: 0 0.5em 0 1em;
+}

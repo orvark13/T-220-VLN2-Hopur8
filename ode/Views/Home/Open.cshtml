@@ -1,0 +1,39 @@
+﻿@model ode.Models.ProjectViewModel
+
+@{
+    ViewData["Title"] = "Open Project";
+}
+<h2>@ViewData["Title"].</h2>
+<h3>@ViewData["Message"]</h3>
+
+<pre style="white-space: pre-line">
+@Html.Raw(Json.Serialize(Model))
+</pre>
+
+<table id="bs-table" class="table table-hover">
+    <thead>
+        <tr>
+            <th class="text-right" data-sort="int">#</th>
+            <th class="col-sm-8 text-left" data-sort="string">Name</th>
+            <th class="col-sm-2 text-right" data-sort="int">Created By</th>
+            <th class="col-sm-2 text-right" data-sort="int">Modified</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="4">
+                <small class="pull-left text-muted">x folders and y files, zz.zz MB in total.</small>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+    @foreach (var file in Model.Files) {
+        <tr>
+            <td class="text-muted text-righ"></td>
+            <td class="text-left">@Html.DisplayFor(modelItem => file.Name)</td>
+            <td class="text-right">@Html.DisplayFor(modelItem => file.CreatedByUser.Name)</td>
+            <td class="text-right">@Html.DisplayFor(modelItem => file.CreatedDate)</td>
+        </tr>
+    }
+    </tbody>                          
+</table>

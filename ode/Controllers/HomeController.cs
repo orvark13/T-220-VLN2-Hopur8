@@ -109,6 +109,26 @@ namespace ode.Controllers
             }
         }
 
+        public IActionResult Editor(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new EditorViewModel() {};
+
+            ViewData["Message"] = "Here be Editing";
+
+            if (true) { // TODO check if currentUser is authorized ...
+                return View(viewModel);
+            }
+            else
+            {
+                return new ChallengeResult();
+            }
+        }
+
         [HttpGet]
         public ProjectViewModel GetSharing(int id)
         {
