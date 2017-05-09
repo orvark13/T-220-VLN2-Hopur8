@@ -8,11 +8,17 @@ div.list-group-item:hover button:not(.hidden) {
 }
 
 .list-group-item h4 {
-    height: 1.5em;
+    height: 2em;
 }
 
 .list-group-item p {
-    line-height: 1.7em;
+    line-height: 2em;
+}
+
+.list-group input, 
+.modal-body input {
+    min-width: 200px;
+    max-width: 100% !important;
 }
 
 .select2-selection, .select2-results, .select2-container, .select2-dropdown {
@@ -49,4 +55,24 @@ select.sharing {
     overflow-x: hidden;
     overflow-y: scroll;
     padding: 0 0.5em 0 1em;
+}
+
+
+/* ... */
+
+.navbar-inverse {
+    background-color: #158cba;
+    border-color: #127ba3;
+}
+
+.navbar-inverse .navbar-brand:hover,
+.navbar-inverse .navbar-nav>li>a:hover,
+.navbar-inverse .btn-link:hover,
+.navbar-inverse .navbar-nav>.open>a:hover,
+.navbar-inverse .navbar-brand,
+.navbar-inverse .navbar-nav>li>a,
+.navbar-inverse .btn-link,
+.navbar-inverse .navbar-nav>.open>a {
+    color: #fff;
+    text-decoration: none;
 }

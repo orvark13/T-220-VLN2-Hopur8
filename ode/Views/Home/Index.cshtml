@@ -4,14 +4,19 @@
     ViewData["Title"] = "Projects";
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<p>Projects:</p>
+<h2>
+    @ViewData["Title"]
+    <button class="btn btn-success pull-right" data-toggle="modal" data-target="#newProjectModal">Add New</button>
+</h2>
+<h4>Your Projects</h4>
 
 <div class="list-group">
 @foreach (var project in Model.Projects) {
     <div class="project@(project.ID) list-group-item">
-        <a class="btn btn-primary pull-right" asp-action="Open" asp-route-id="@project.ID">Open</a>
+        <div class="pull-right">
+            <a class="btn btn-primary" asp-action="Open" asp-route-id="@project.ID">Open</a>
+            <a class="btn btn-danger" asp-action="Delete" asp-route-id="@project.ID">Delete</a>
+        </div>
         <h4 class="list-group-item-heading">
         <span class="list-group-item-heading">@Html.DisplayFor(modelItem => project.Name)</span>
         <button class="editName btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil
@@ -61,6 +66,29 @@
 </ul>
 -->
 
+<div class="modal fade" id="newProjectModal" tabindex="-1" role="dialog" aria-labelledby="newProjectModalLabel">
+    <form asp-area="" asp-controller="Home" asp-action="Post" method="post">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="newProjectModalLabel">New Project</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                    <label for="name-field" class="control-label">Project's Name:</label>
+                    <input type="text" class="form-control" name="name" id="name-field">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Project</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
 @section scripts
 {
     <script>
@@ -72,11 +100,13 @@
             p.find('.updateName').removeClass('hidden');
 
             var span = p.find('span').first();
+            var spanWidth = (span.outerWidth(true) + 10) + 'px';
             var input = $('<input />', {
                 'type': 'text',
-                'value': span.text(),
+                'value': span.text()
             });
             span.replaceWith(input);
+            input.outerWidth(spanWidth);
             input.focus().select();
             input.blur(function () {
                 p.find('.updateName').trigger('click');

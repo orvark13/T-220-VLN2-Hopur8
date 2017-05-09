@@ -3,8 +3,14 @@
 @{
     ViewData["Title"] = "Open Project";
 }
-<h2>@ViewData["Title"].</h2>
-<h3>@ViewData["Message"]</h3>
+<h2>
+    @Html.DisplayFor(modelItem => Model.Name)
+    <small>
+        @Html.DisplayFor(modelItem => Model.CreatedByUser.Name)
+        @Html.DisplayFor(modelItem => Model.CreatedDate)
+    </small>
+</h2>
+<h4>File Listing</h4>
 
 <pre style="white-space: pre-line">
 @Html.Raw(Json.Serialize(Model))

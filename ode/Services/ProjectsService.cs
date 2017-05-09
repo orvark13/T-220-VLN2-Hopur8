@@ -17,7 +17,7 @@ namespace ode.Services
             _context = context;
         }
 
-        public bool Create(string name, string userID)
+        public int Create(string name, string userID)
         {
             var project = new Project()
             {
@@ -30,7 +30,7 @@ namespace ode.Services
             _context.Projects.Add(project);
             _context.SaveChanges();
 
-            return true; // TODO
+            return project.ID;
         }
 
         public bool UpdateName(int projectID, string name)
@@ -126,6 +126,27 @@ namespace ode.Services
             };
 
             return user;
+        }
+
+        public void DeleteProjectByID(int projectID)
+        {
+            if (projectID < 0)
+            {
+                return;
+            }
+
+            var project = _context.Projects
+                .SingleOrDefault(m => m.ID == projectID);
+
+            if (project == null)
+            {
+                return;
+            }
+
+            _context.Projects.Remove(project);
+            _context.SaveChanges();
+
+            return;
         }
 
         public ProjectViewModel GetProjectByID(int projectID)

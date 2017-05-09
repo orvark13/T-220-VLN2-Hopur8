@@ -17,13 +17,14 @@ namespace ode.Controllers
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
         private ProjectsService _projectsService;
-        private string _currentUserID;
+        private FilesService _filesService;
 
         public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
             _projectsService = new ProjectsService(_context);
+            _filesService = new FilesService(_context);
         }
 
         public IActionResult Index()
@@ -41,19 +42,33 @@ namespace ode.Controllers
         }
 
         [HttpPost]
-        public bool Post(int? id, string name, bool template = false)
+        public async Task<IActionResult> Post(int? id, string name, bool template = false)
         {
             if (id == null)
             {
                 // /Projects/Post => new project
                 var currentUserID = _userManager.GetUserId(User);
-                return _projectsService.Create(name, currentUserID);
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    name = "New Project";
+                }
+                var projectId = _projectsService.Create(name, currentUserID);
+
+                _filesService.Create("README.md", projectId, currentUserID, "# README\n\nDescribe you project here.");
+
+                return RedirectToAction(nameof(HomeController.Index), "Home");
             }
             else
             {
                 // /Project/Post/ID
                 // Only know how to update name
-                return _projectsService.UpdateName(id ?? -1, name);
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    name = "#" + id.ToString();
+                }
+                _projectsService.UpdateName(id ?? -1, name);
+
+                return new EmptyResult();
             }
         }
 
@@ -67,6 +82,23 @@ namespace ode.Controllers
             };
 
             return Json(r);
+        }
+
+        public IActionResult Delete(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+
+            if (true) { // TODO check if currentUser is authorized ...
+                _projectsService.DeleteProjectByID(id ?? -1);
+                return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
+            else
+            {
+                return new ChallengeResult();
+            }
         }
 
         /*[HttpGet]
