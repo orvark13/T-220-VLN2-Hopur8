@@ -21,7 +21,7 @@
         <link rel="stylesheet" href="~/css/extra.css" />
     </environment>
 </head>
-<body>
+<body class="@(ViewContext.RouteData.Values["controller"].ToString().ToLower()) @(ViewContext.RouteData.Values["action"].ToString().ToLower())">
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -35,8 +35,12 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Projects</a></li>
+                    <li><a id="tb-projects" asp-area="" asp-controller="Home" asp-action="Index">Projects</a></li>
                 </ul>
+                @if (ViewContext.RouteData.Values["action"].ToString() == "Editor")
+                {
+                    @await Html.PartialAsync("_ToolbarPartial")
+                }
                 @await Html.PartialAsync("_LoginPartial")
             </div>
         </div>

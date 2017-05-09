@@ -35,18 +35,29 @@ select.sharing {
     border: 1px solid #aaa !important;
 }
 
+/* ... */
+
+body.editor .container {
+    width: 96%;
+}
+
+.navbar-btn:hover {
+    margin-bottom: 4px;
+}
+
 #editor { 
     position: absolute;
-    top: 51px;
+    top: 55px;
     left: 0px;
     bottom: 0px;
     right: 50%;
     width: 50%;
+    border-right: solid 1px #158cba;
 }
 
 #preview {
     position: absolute;
-    top: 51px;
+    top: 55px;
     left: 50%;
     bottom: 0px;
     right: 0px;
@@ -55,8 +66,12 @@ select.sharing {
     overflow-x: hidden;
     overflow-y: scroll;
     padding: 0 0.5em 0 1em;
+    border-left: solid 1px #127ba3;
 }
 
+#preview img {
+    max-width: 100%;
+}
 
 /* ... */
 
