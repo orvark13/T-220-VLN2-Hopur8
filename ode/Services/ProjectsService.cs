@@ -11,10 +11,14 @@ namespace ode.Services
     public class ProjectsService
     {
         private readonly ApplicationDbContext _context;
+        private readonly UsersService _usersService;
+        private readonly FilesService _filesService;
 
-        public ProjectsService(ApplicationDbContext context)
+        public ProjectsService(ApplicationDbContext context, UsersService usersService, FilesService filesService)
         {
             _context = context;
+            _usersService = usersService;
+            _filesService = filesService;
         }
 
         public int Create(string name, string userID)
@@ -31,6 +35,17 @@ namespace ode.Services
             _context.SaveChanges();
 
             return project.ID;
+        }
+
+        public bool HasAccessToProject(string userID, int projectID)
+        {
+            return _context.Projects.SingleOrDefault(p => p.ID == projectID && p.CreatedByUserID == userID) != null
+                || SharedWithUsers(projectID).Any(x => x.ID == userID);
+        }
+
+        public bool HasAccessToFile(string userID, int fileID)
+        {
+            return HasAccessToProject(userID, _filesService.GetFilesProjectID(fileID));
         }
 
         public bool UpdateName(int projectID, string name)
@@ -69,7 +84,7 @@ namespace ode.Services
             foreach (ProjectListingViewModel p in projects)
             {
                 p.SharedWith = SharedWithUsers(p.ID);
-                p.CreatedByUser = GetUserByID(p.CreatedByUserID);
+                p.CreatedByUser = _usersService.GetUserByID(p.CreatedByUserID);
             }
 
             return projects;
@@ -99,35 +114,6 @@ namespace ode.Services
             return sharedWithUsers;            
         }
 
-        public List<UserSelectItemViewModel> GetUsersMatchingName(string partial)
-        {
-            var users = _context.Users.Where(m => m.UserName.ToLower().Contains(partial.ToLower()))
-                .Select(x => new UserSelectItemViewModel
-                {
-                    ID = x.Id,
-                    Text = x.UserName
-                })
-                .Take(10)
-                .ToList();
-
-            return users;            
-        }
-
-        public UserViewModel GetUserByID(string userID)
-        {
-            var applicationUser = _context.Users
-                .SingleOrDefault(u => u.Id == userID);
-            
-            var user = new UserViewModel
-            {
-                ID = applicationUser.Id,
-                Name = applicationUser.UserName,
-                Email = applicationUser.Email
-            };
-
-            return user;
-        }
-
         public void DeleteProjectByID(int projectID)
         {
             if (projectID < 0)
@@ -146,17 +132,16 @@ namespace ode.Services
             _context.Projects.Remove(project);
             _context.SaveChanges();
 
-            return;
+            _filesService.DeleteFilesByProjectID(projectID);
         }
 
         public ProjectViewModel GetProjectByID(int projectID)
         {
-            var project = _context.Projects.SingleOrDefault(p => p.ID == projectID);
+            var project = _context.Projects.SingleOrDefault(p => p.ID == projectID && p.Template == false);
             if (project == null)
             {
-                // TODO error
+                return new ProjectViewModel();
             }
-            // TODO confirm project not template ?
 
             var files = _context.Nodes
                 .Where(n => n.ProjectID == projectID && n.Type == NodeType.File)
@@ -171,10 +156,15 @@ namespace ode.Services
                 })
                 .ToList();
 
+            foreach (FileViewModel f in files)
+            {
+                f.CreatedByUser = _usersService.GetUserByID(f.CreatedByUserID);
+            }
+
             var mainFile = files
                 .SingleOrDefault(n => n.ID == project.MainNodeID);
 
-            var createdByUser = GetUserByID(project.CreatedByUserID);
+            var createdByUser = _usersService.GetUserByID(project.CreatedByUserID);
 
             var sharedWith = SharedWithUsers(projectID);
 

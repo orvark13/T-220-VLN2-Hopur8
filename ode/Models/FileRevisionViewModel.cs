@@ -18,7 +18,7 @@ namespace ode.Models
 
         public string Description { get; set; }
 
-        public byte[] Contents { get; set; }
+        public string Contents { get; set; }
 
         public string CreatedByUserID { get; set; } // CreatedBy
 

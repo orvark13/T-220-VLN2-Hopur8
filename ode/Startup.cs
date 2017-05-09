@@ -52,6 +52,10 @@ namespace ode
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
+
+            services.AddTransient<ProjectsService>();
+            services.AddTransient<FilesService>();
+            services.AddTransient<UsersService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -85,7 +89,7 @@ namespace ode
             });
 
             // Seed the Database
-            DbInitializer.Initialize(context);
+            //DbInitializer.Initialize(context);
         }
     }
 }

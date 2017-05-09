@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,33 +12,35 @@ using Microsoft.AspNetCore.Identity;
 namespace ode.Controllers
 {
     [Authorize]
-    public class HomeController : Controller
+    public class FilesController : Controller
     {
         private UserManager<ApplicationUser> _userManager;
         private ProjectsService _projectsService;
         private FilesService _filesService;
-        private UsersService _usersService;
 
-        public HomeController(ProjectsService projectsService, FilesService filesService, UsersService usersService, UserManager<ApplicationUser> userManager)
+        public FilesController(ProjectsService projectsService, FilesService filesService, UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
             _projectsService = projectsService;
             _filesService = filesService;
-            _usersService = usersService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int? id)
         {
-            var currentUserID = _userManager.GetUserId(User);
-
-            var viewModel = new ProjectsPageViewModel()
+            if (id == null || id == 0)
             {
-                Projects = _projectsService.GetUsersProjects(currentUserID),
-                Templates = _projectsService.GetUsersTemplates(currentUserID),
-                CurrentUser = _usersService.GetUserByID(currentUserID)
-            };
-            
-            return View(viewModel);
+                return NotFound();
+            }
+
+            var viewModel = _projectsService.GetProjectByID(id ?? -1);
+
+            if (_projectsService.HasAccessToProject(_userManager.GetUserId(User), id ?? -1)) {
+                return View(viewModel);
+            }
+            else
+            {
+                return new ChallengeResult();
+            }
         }
 
         [HttpPost]
@@ -72,18 +74,6 @@ namespace ode.Controllers
             }
         }
 
-        [HttpGet]
-        public JsonResult MatchingUsers(string term)
-        {
-            var users = _usersService.GetUsersMatchingName(term);
-
-            var r = new {
-                items = users
-            };
-
-            return Json(r);
-        }
-
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0)
@@ -91,9 +81,9 @@ namespace ode.Controllers
                 return NotFound();
             }
 
-            if (_projectsService.HasAccessToProject(_userManager.GetUserId(User), id ?? -1)) {
-                _projectsService.DeleteProjectByID(id ?? -1);
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+            if (_projectsService.HasAccessToFile(_userManager.GetUserId(User), id ?? -1)) {
+                _filesService.DeleteFileByID(id ?? -1);
+                return RedirectToAction(nameof(FilesController.Index), "Files");
             }
             else
             {
@@ -101,36 +91,25 @@ namespace ode.Controllers
             }
         }
 
-        /*[HttpGet]
-        public IEnumerable<UserSelectItemViewModel> GetUsers(string id)
+        public IActionResult Editor(int? id, int? rev)
         {
-            if (string.IsNullOrWhiteSpace(id)) return null;
-
-            var items = new List<SelectItem>();
-
-            string[] idList = id.Split(new char[] { ',' });
-            foreach (var idStr in idList)
+            if (id == null || id == 0)
             {
-                int idInt;
-                if (int.TryParse(idStr, out idInt))
-                {
-                    items.Add(_makes.FirstOrDefault(m => m.id == idInt));
-                }
+                return NotFound();
             }
 
-            return items;
-        }*/
+            var viewModel = new EditorViewModel() {
+                File = _filesService.GetFile(id ?? -1),
+                FileRevision = _filesService.GetFileRevision(id ?? -1, rev)
+            };
 
-        [HttpGet]
-        public ProjectViewModel GetSharing(int id)
-        {
-            return _projectsService.GetProjectByID(id);
-        }
-
-        [HttpPost]
-        public ProjectViewModel PutSharing(int id)
-        {
-            return _projectsService.GetProjectByID(id);
+            if (_projectsService.HasAccessToFile(_userManager.GetUserId(User), id ?? -1)) {
+                return View(viewModel);
+            }
+            else
+            {
+                return new ChallengeResult();
+            }
         }
 
         [AllowAnonymous]

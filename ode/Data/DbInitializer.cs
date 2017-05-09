@@ -12,9 +12,6 @@ namespace ode.Data
     {
         public static void Initialize(ApplicationDbContext context)
         {
-            // FIXME, turning this off for now.
-            return;
-
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
@@ -85,7 +82,7 @@ namespace ode.Data
                 new FileRevision {
                     NodeID = 1, //nodes[0].ID,
                     Description = "Initial version",
-                    Contents = System.Text.Encoding.ASCII.GetBytes("Hello World"),
+                    Contents = System.Text.Encoding.UTF8.GetBytes("Hello World"),
                     CreatedByUserID = userOrvar.Id,
                     CreatedDate = DateTime.Parse("2017-04-04")
                 }

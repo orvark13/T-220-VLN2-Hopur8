@@ -6,7 +6,7 @@
 
 <h2>
     @ViewData["Title"]
-    <button class="btn btn-success pull-right" data-toggle="modal" data-target="#newProjectModal">Add New</button>
+    <button class="btn btn-success pull-right" data-toggle="modal" data-target="#newProjectModal"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New Project</button>
 </h2>
 <h4>Your Projects</h4>
 
@@ -14,7 +14,7 @@
 @foreach (var project in Model.Projects) {
     <div class="project@(project.ID) list-group-item">
         <div class="pull-right">
-            <a class="btn btn-primary" asp-action="Open" asp-route-id="@project.ID">Open</a>
+            <a class="btn btn-primary" asp-controller="Files" asp-action="Index" asp-route-id="@project.ID">Open</a>
             <a class="btn btn-danger" asp-action="Delete" asp-route-id="@project.ID">Delete</a>
         </div>
         <h4 class="list-group-item-heading">
@@ -125,8 +125,7 @@
             if (name != input.prop("defaultValue")) {
                 $.post("/Home/Post/" + pid, {'name': name})
                     .done(function (r) {
-                        // TODO use validated name from server for update
-                        //alert('svar ' + r);
+                        // TODO get a validated name from the server
                     });
             }
 
@@ -155,7 +154,7 @@
                     dataType: 'json',
                     delay: 100,
                     processResults: function (data, params) {
-                        // TODO remove existing
+                        // TODO remove already existing
                         return {
                             results: data.items
                         }

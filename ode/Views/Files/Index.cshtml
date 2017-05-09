@@ -1,0 +1,89 @@
+﻿@model ode.Models.ProjectViewModel
+
+<h2>
+    @Html.DisplayFor(modelItem => Model.Name)
+    <small>
+        @Html.DisplayFor(modelItem => Model.CreatedByUser.Name)
+        @Html.DisplayFor(modelItem => Model.CreatedDate)
+    </small>
+    <button class="btn btn-success pull-right" data-toggle="modal" data-target="#newFileModal"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New File</button>
+</h2>
+
+<p class="sharedWith sharedWith@(@Model.ID)">
+    <span class="text-muted">Shared with:</span>
+    @if(@Model.SharedWith.Any()) {
+        <span class="sharing">
+        @foreach (var user in @Model.SharedWith) {
+            <span class="select2-selection__choice">@Html.DisplayFor(modelItem => user.Name)</span>
+        }
+        </span>
+    }
+    else
+    {
+        <span class="sharing"><em>None.</em></span>
+    }
+</p>
+
+<h4>File Listing</h4>
+
+<pre style="white-space: pre-line">
+@Html.Raw(Json.Serialize(Model))
+</pre>
+
+<table id="bs-table" class="table table-hover">
+    <thead>
+        <tr>
+            <th class="text-right" data-sort="int">#</th>
+            <th class="col-sm-6 text-left" data-sort="string">Name</th>
+            <th class="col-sm-2 text-right" data-sort="int">Created By</th>
+            <th class="col-sm-2 text-right" data-sort="int">Modified</th>
+            <th class="col-sm-2 text-right" data-sort="int">Action</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="5">
+                <small class="pull-left text-muted">Project contains @Model.Files.Count() files.</small>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+    @{int i = 0;}
+    @foreach (var file in Model.Files) {
+        i++;
+        <tr>
+            <td class="text-muted text-righ">@i</td>
+            <td class="text-left">@Html.DisplayFor(modelItem => file.Name)</td>
+            <td class="text-right">@Html.DisplayFor(modelItem => file.CreatedByUser.Name)</td>
+            <td class="text-right">@Html.DisplayFor(modelItem => file.CreatedDate)</td>
+            <td class="text-right">
+                <a class="btn btn-primary btn-xs" asp-action="Editor" asp-route-id="@file.ID">Edit</a>
+                <a class="btn btn-danger btn-xs" asp-action="Delete" asp-route-id="@file.ID">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>                          
+</table>
+
+<div class="modal fade" id="newFileModal" tabindex="-1" role="dialog" aria-labelledby="newFileModalLabel">
+    <form asp-area="" asp-controller="Files" asp-action="Post" method="post">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="newFileModalLabel">New File</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                    <label for="name-field" class="control-label">File's Name:</label>
+                    <input type="text" class="form-control" name="name" id="name-field">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create File</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -11,10 +11,12 @@ namespace ode.Services
     public class FilesService
     {
         private readonly ApplicationDbContext _context;
-
-        public FilesService(ApplicationDbContext context)
+        private readonly UsersService _usersService;
+        
+        public FilesService(ApplicationDbContext context, UsersService usersService)
         {
             _context = context;
+            _usersService = usersService;
         }
 
         public int Create(string fileName, int projectID, string userID, string contents)
@@ -36,7 +38,7 @@ namespace ode.Services
             {
                 NodeID = node.ID,
                 Description = "Revision of " + fileName + " saved " + DateTime.Now.ToString(),
-                Contents = System.Text.Encoding.ASCII.GetBytes(contents),
+                Contents = System.Text.Encoding.UTF8.GetBytes(contents),
                 CreatedByUserID = userID,
                 CreatedDate = DateTime.Now
             };
@@ -45,6 +47,110 @@ namespace ode.Services
             _context.SaveChanges();
 
             return node.ID;
+        }
+
+        public int GetFilesProjectID(int nodeID)
+        {
+            return _context.Nodes.SingleOrDefault(n => n.ID == nodeID).ProjectID;
+        }
+
+        public FileViewModel GetFile(int nodeID)
+        {
+            var file = _context.Nodes
+                .Where(n => n.ID == nodeID)
+                .Select(x => new FileViewModel
+                {
+                    ID = x.ID,
+                    Name = x.Name,
+                    ParentNodeID = x.ParentNodeID,
+                    ProjectID = x.ProjectID,
+                    CreatedByUserID = x.CreatedByUserID,
+                    CreatedDate = x.CreatedDate
+                })
+                .SingleOrDefault();
+            
+            file.CreatedByUser = _usersService.GetUserByID(file.CreatedByUserID);
+
+            return file;
+        }
+
+        public FileRevisionViewModel GetFileRevision(int nodeID, int? fileRevisionID)
+        {
+            var revision = new FileRevisionViewModel();
+
+            if (fileRevisionID == null)
+            {
+                revision = _context.FileRevisions
+                    .Where(r => r.NodeID == nodeID)
+                    .OrderByDescending(r => r.CreatedDate)
+                    .Select(x => new FileRevisionViewModel
+                    {
+                        ID = x.ID,
+                        NodeID = x.NodeID,
+                        Description = x.Description,
+                        Contents = System.Text.Encoding.UTF8.GetString(x.Contents),
+                        CreatedByUserID = x.CreatedByUserID,
+                        CreatedDate = x.CreatedDate
+                    })
+                    .SingleOrDefault();
+            }
+            else
+            {
+                revision = _context.FileRevisions
+                    .Where(r => r.ID == fileRevisionID)
+                    .Select(x => new FileRevisionViewModel
+                    {
+                        ID = x.ID,
+                        NodeID = x.NodeID,
+                        Description = x.Description,
+                        Contents = System.Text.Encoding.UTF8.GetString(x.Contents),
+                        CreatedByUserID = x.CreatedByUserID,
+                        CreatedDate = x.CreatedDate
+                    })
+                    .SingleOrDefault();
+            }
+
+            return revision;
+        }
+
+        public void DeleteFileByID(int nodeID)
+        {
+            var node = _context.Nodes
+                .Where(n => n.ID == nodeID);
+
+            if (node == null)
+            {
+                return;
+            }
+
+            var revisions = _context.FileRevisions
+                .Where(r => r.NodeID == nodeID);
+            if (revisions != null)
+            {
+                _context.RemoveRange(revisions);
+            }
+            _context.Remove(node);
+
+            _context.SaveChanges();
+
+        }
+
+        public void DeleteFilesByProjectID(int projectID)
+        {
+            var nodes = _context.Nodes
+                .Where(n => n.ProjectID == projectID)
+                .ToList();
+            
+            foreach (var n in nodes)
+            {
+                var revisions = _context.FileRevisions
+                    .Where(r => r.NodeID == n.ID);
+                _context.RemoveRange(revisions);
+            }
+
+            _context.RemoveRange(nodes);
+
+            _context.SaveChanges();
         }
 
         public bool UpdateName(int projectID, string name)
