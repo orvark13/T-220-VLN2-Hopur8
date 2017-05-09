@@ -44,34 +44,18 @@ namespace ode.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(int? id, string name, bool template = false)
+        public IActionResult Post(int id, string name)
         {
-            if (id == null)
+            // /Files/Post/pID => new file in project
+            var currentUserID = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(name))
             {
-                // /Projects/Post => new project
-                var currentUserID = _userManager.GetUserId(User);
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    name = "New Project";
-                }
-                var projectId = _projectsService.Create(name, currentUserID);
-
-                _filesService.Create("README.md", projectId, currentUserID, "# README\n\nDescribe you project here.");
-
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+                name = "NN.md";
             }
-            else
-            {
-                // /Project/Post/ID
-                // Only know how to update name
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    name = "#" + id.ToString();
-                }
-                _projectsService.UpdateName(id ?? -1, name);
+            _filesService.Create(name, id, currentUserID, "");
 
-                return new EmptyResult();
-            }
+            return RedirectToAction(nameof(FilesController.Index), "Files", new {id = id});
         }
 
         public IActionResult Delete(int? id)
@@ -82,8 +66,9 @@ namespace ode.Controllers
             }
 
             if (_projectsService.HasAccessToFile(_userManager.GetUserId(User), id ?? -1)) {
+                var projectID = _filesService.GetFilesProjectID(id ?? -1);
                 _filesService.DeleteFileByID(id ?? -1);
-                return RedirectToAction(nameof(FilesController.Index), "Files");
+                return RedirectToAction(nameof(FilesController.Index), "Files", new {id = projectID});
             }
             else
             {

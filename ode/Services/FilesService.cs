@@ -116,7 +116,7 @@ namespace ode.Services
         public void DeleteFileByID(int nodeID)
         {
             var node = _context.Nodes
-                .Where(n => n.ID == nodeID);
+                .SingleOrDefault(n => n.ID == nodeID);
 
             if (node == null)
             {
@@ -129,10 +129,9 @@ namespace ode.Services
             {
                 _context.RemoveRange(revisions);
             }
-            _context.Remove(node);
+            _context.Nodes.Remove(node);
 
             _context.SaveChanges();
-
         }
 
         public void DeleteFilesByProjectID(int projectID)

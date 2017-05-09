@@ -26,9 +26,11 @@
 
 <h4>File Listing</h4>
 
+<!--
 <pre style="white-space: pre-line">
 @Html.Raw(Json.Serialize(Model))
 </pre>
+-->
 
 <table id="bs-table" class="table table-hover">
     <thead>
@@ -66,7 +68,7 @@
 </table>
 
 <div class="modal fade" id="newFileModal" tabindex="-1" role="dialog" aria-labelledby="newFileModalLabel">
-    <form asp-area="" asp-controller="Files" asp-action="Post" method="post">
+    <form asp-area="" asp-controller="Files" asp-action="Post" asp-route-id="@Model.ID" method="post">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
