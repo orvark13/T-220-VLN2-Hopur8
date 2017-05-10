@@ -167,6 +167,20 @@ namespace ode.Services
             _context.SaveChanges();
         }
 
+        public bool IsNameUnique(int projectID, string name)
+        {
+            var node = _context.Nodes
+                .Where(p => p.ProjectID == projectID
+                            && p.Name == name)
+                .SingleOrDefault();
+            
+            if (node != null)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public bool UpdateName(int nodeID, string name)
         {
             if (name.Length > 0)

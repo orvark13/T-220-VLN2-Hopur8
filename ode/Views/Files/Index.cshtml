@@ -26,12 +26,6 @@
 
 <h4>File Listing</h4>
 
-<!--
-<pre style="white-space: pre-line">
-@Html.Raw(Json.Serialize(Model))
-</pre>
--->
-
 <table id="bs-table" class="table table-hover">
     <thead>
         <tr>
@@ -68,7 +62,7 @@
 </table>
 
 <div class="modal fade" id="newFileModal" tabindex="-1" role="dialog" aria-labelledby="newFileModalLabel">
-    <form asp-area="" asp-controller="Files" asp-action="Post" asp-route-id="@Model.ID" method="post">
+    <form id="createFile" asp-area="" asp-controller="Files" asp-action="Post" asp-route-id="@Model.ID" method="post">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -76,9 +70,10 @@
                     <h4 class="modal-title" id="newFileModalLabel">New File</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group name-row">
                         <label for="name-field" class="control-label">File's Name:</label>
-                        <input type="text" class="form-control" name="name" id="name-field">
+                        <input type="text" class="form-control" name="name" id="name-field" autocomplete="off">
+                        <span class="help-block"></span>
                     </div>
                     <div class="checkbox">
                         <label>
@@ -88,9 +83,54 @@
                 </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Create File</button>
+                <button type="submit" class="btn btn-primary createFile">Create File</button>
                 </div>
             </div>
         </div>
     </form>
 </div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            setTimeout(function () {
+                $('.alert').alert('close');
+                $('.highlight').removeClass('highlight');
+            }, 3000);
+
+            var timer;
+
+            $('#name-field').on('keyup', function () {
+                $('.name-row').removeClass('has-error').removeClass('has-success');
+                $('.name-row .help-block').text('');
+
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    $.post("/Files/ValidateName/@Model.ID", {'name': $('#name-field').val()})
+                        .done(function (r) {
+                            if (r.success != true) {
+                                $('.name-row').addClass('has-error');
+                                $('.name-row .help-block').text(r.error);
+                            } else {
+                                $('.name-row').addClass('has-success');
+                            }
+                    });
+                }, 500);
+            });
+
+            $(document).on("click", ".createFile", function (e) {
+                e.preventDefault();
+                $.post("/Files/ValidateName/@Model.ID", {'name': $('#name-field').val()})
+                    .done(function (r) {
+                        if (r.success == true) {
+                            $('#createFile').submit();
+                        } else {
+                            $('.name-row').addClass('has-error');
+                            $('.name-row .help-block').text(r.error);
+                        }
+                });
+            });
+        });
+    </script>
+}

@@ -75,6 +75,24 @@ namespace ode.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult ValidateName(int id, string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Json(new { success = false, error = "Filename cannot be empty."});
+            }
+
+            if (_filesService.IsNameUnique(id, name))
+            {
+                return Json(new { success = true });
+            }
+            else
+            {
+                return Json(new { success = false, error = "There is already a file with the same name."});
+            }
+        }
+
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0)
