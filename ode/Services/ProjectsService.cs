@@ -94,17 +94,15 @@ namespace ode.Services
                 {
                     _context.Sharings
                         .RemoveRange(removeSharings);
-
-                    _context.SaveChanges();
                 }
 
                 if (addSharings.Count() > 0)
                 {
                     _context.Sharings
                         .AddRange(addSharings);
-
-                    _context.SaveChanges();
                 }
+
+                _context.SaveChanges();
 
                 return true;
             }
