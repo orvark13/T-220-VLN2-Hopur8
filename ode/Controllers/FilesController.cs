@@ -97,6 +97,13 @@ namespace ode.Controllers
             }
         }
 
+        public void SaveRevision(int nodeID, int fileRevisionID, string contents)
+        {
+            // Only updating the current revision for now.
+            // Will be changed when implementation of revision functionaly is finished.
+            _filesService.UpdateFileRevision(nodeID, fileRevisionID, contents);
+        }
+
         [AllowAnonymous]
         public IActionResult Error()
         {

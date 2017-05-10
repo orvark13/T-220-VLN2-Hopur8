@@ -15,9 +15,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.6.4/showdown.min.js"></script>
     <script>
         $(document).ready(function () {
+            var dirty = false;
+
             var editor = ace.edit("editor");
             editor.setTheme("ace/theme/xcode");
             editor.getSession().setMode("ace/mode/markdown");
+            editor.$blockScrolling = Infinity;
 
             var converter = new showdown.Converter();
 
@@ -25,17 +28,29 @@
                 var source = editor.getSession().getValue();
                 var html = converter.makeHtml(source);
                 $('#preview').html(html);
+                dirty = true;
+                $('#tb-save').removeClass('btn-success').addClass('btn-warning');
             });
 
             $('#preview').html(converter.makeHtml(editor.getSession().getValue()));
 
             $('#tb-files,#tb-projects').on('click', function (e) {
-                if (!confirm("Unsaved changes might be lost.\n\nAre your sure you want to leave the editor?")) {
+                if (dirty && !confirm("Unsaved changes might be lost.\n\nAre your sure you want to leave the editor?")) {
                     e.preventDefault();
                 } 
             });
             $('#tb-save').on('click', function () {
-                // TODO SAVE
+                if (dirty) {
+                $.post("/Files/SaveRevision/", {
+                        'nodeID': @(Model.File.ID),
+                        'fileRevisionID': @(Model.FileRevision.ID),
+                        'contents': editor.getSession().getValue()
+                    })
+                    .done(function (r) {
+                        $('#tb-save').removeClass('btn-warning').addClass('btn-success');
+                        dirty = false;
+                    });
+                }
             });
 
         });

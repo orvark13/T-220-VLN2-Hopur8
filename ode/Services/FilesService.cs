@@ -113,6 +113,21 @@ namespace ode.Services
             return revision;
         }
 
+        public void UpdateFileRevision(int nodeID, int fileRevisionID, string contents)
+        {
+            var revision = _context.FileRevisions
+                .SingleOrDefault(r => r.ID == fileRevisionID);
+
+            if (revision == null)
+            {
+                return;
+            }
+
+            revision.Contents = System.Text.Encoding.UTF8.GetBytes(contents);
+            revision.Description = "Revision overwritten on " + DateTime.Now.ToString();
+            _context.SaveChanges();
+        }
+
         public void DeleteFileByID(int nodeID)
         {
             var node = _context.Nodes
@@ -152,15 +167,15 @@ namespace ode.Services
             _context.SaveChanges();
         }
 
-        public bool UpdateName(int projectID, string name)
+        public bool UpdateName(int nodeID, string name)
         {
             if (name.Length > 0)
             {
-                var project = _context.Projects
-                    .Where(p => p.ID == projectID)
+                var node = _context.Nodes
+                    .Where(p => p.ID == nodeID)
                     .SingleOrDefault();
                 
-                project.Name = name;
+                node.Name = name;
 
                 _context.SaveChanges();
 
