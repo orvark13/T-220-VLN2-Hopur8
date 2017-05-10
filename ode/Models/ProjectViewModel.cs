@@ -17,6 +17,7 @@ namespace ode.Models
         public string CreatedByUserID { get; set; }
         public UserViewModel CreatedByUser { get; set; }
         public bool Template { get; set; }
+        [DisplayFormat(DataFormatString = "{0:M/d}")]
         public DateTime CreatedDate { get; set; }
 
         public IEnumerable<UserViewModel> SharedWith { get; set; }
@@ -39,6 +40,8 @@ namespace ode.Models
 
     public class ProjectsPageViewModel
     {
+        // TODO
+        public NoticeViewModel Notice { get; set; }
         public IEnumerable<ProjectListingViewModel> Projects { get; set; }
         public IEnumerable<ProjectListingViewModel> Templates { get; set; }
         public UserViewModel CurrentUser { get; set; }

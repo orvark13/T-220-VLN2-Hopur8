@@ -8,17 +8,30 @@
     @ViewData["Title"]
     <button class="btn btn-success pull-right" data-toggle="modal" data-target="#newProjectModal"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New Project</button>
 </h2>
+
+@if(@Model.Notice.MessageID != 0) {
+    <div class="alert @(@Model.Notice.MessageID > 0 ? "alert-info" : "alert-warning") alert-dismissible fade in" role=alert>
+        <button type=button class=close data-dismiss=alert aria-label=Close><span aria-hidden=true>&times;</span></button>
+        <strong>
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Notice:</span>
+        </strong>
+        @Model.Notice.Message
+    </div>
+}
+
 <h4>Your Projects</h4>
 
 <div class="list-group">
 @foreach (var project in Model.Projects) {
-    <div class="project@(project.ID) list-group-item">
+    <div class="project@(project.ID) list-group-item@(Model.Notice.NewID == project.ID ? " highlight" : "")">
         <div class="pull-right">
             <a class="btn btn-primary" asp-controller="Files" asp-action="Index" asp-route-id="@project.ID">Open</a>
             <a class="btn btn-danger" asp-action="Delete" asp-route-id="@project.ID">Delete</a>
         </div>
         <h4 class="list-group-item-heading">
         <span class="list-group-item-heading">@Html.DisplayFor(modelItem => project.Name)</span>
+        @(Model.Notice.NewID == project.ID ? "NEW" : "")
         <button class="editName btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil
 "></span></button>
         <button class="updateName btn btn-primary btn-xs hidden" data-pid="@project.ID">OK</button>
@@ -67,7 +80,7 @@
 -->
 
 <div class="modal fade" id="newProjectModal" tabindex="-1" role="dialog" aria-labelledby="newProjectModalLabel">
-    <form asp-area="" asp-controller="Home" asp-action="Post" method="post">
+    <form asp-area="" asp-controller="Home" asp-action="Create" method="post">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -123,8 +136,9 @@
             var name = input.val();
 
             if (name != input.prop("defaultValue")) {
-                $.post("/Home/Post/" + pid, {'name': name})
+                $.post("/Home/Rename/" + pid, {'name': name})
                     .done(function (r) {
+                        alert(r.success);
                         // TODO get a validated name from the server
                     });
             }
@@ -181,17 +195,13 @@
                 console.log(selectionIDs);
                 console.log(selections.join(", "));
 
-                // FIXME persist changed sharing in db
                 $.ajax({
                     type: "POST",
-                    url: "/Home/Post/" + pid,
-                    data: JSON.stringify({ 'sharing': selectionIDs}),
-                    contentType: "application/json; charset=utf-8",
+                    url: "/Home/Sharing/" + pid,
+                    data: {'sharing': selectionIDs.join(",")},
                     dataType: "json",
-                    success: function(data) {alert(data);},
-                    failure: function(errMsg) {
-                        alert(errMsg);
-                    }
+                    success: function(data) { /* TODO */ },
+                    failure: function(data) { Console.log('Sharing update failed!'); },
                 });
 
                 setTimeout(function(){
@@ -201,7 +211,6 @@
                 }, 50);
 
                 p.find('.editSharing').removeClass('hidden');
-                //p.find('.updateSharing').addClass('hidden');
             });
 
             p.find('.editSharing').addClass('hidden');
@@ -227,7 +236,10 @@
 
 
         $(document).ready(function () {
-            
+            setTimeout(function () {
+                $('.alert').alert('close');
+                $('.highlight').removeClass('highlight');
+            }, 3000);
         });
     </script>
 }

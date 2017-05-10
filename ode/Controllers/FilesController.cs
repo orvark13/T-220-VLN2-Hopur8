@@ -44,7 +44,7 @@ namespace ode.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(int id, string name)
+        public IActionResult Post(int id, string name, string open = "on")
         {
             // /Files/Post/pID => new file in project
             var currentUserID = _userManager.GetUserId(User);
@@ -53,9 +53,26 @@ namespace ode.Controllers
             {
                 name = "NN.md";
             }
-            _filesService.Create(name, id, currentUserID, "");
+            var nodeID = _filesService.Create(name, id, currentUserID, "");
 
-            return RedirectToAction(nameof(FilesController.Index), "Files", new {id = id});
+            if (open == "on" && nodeID > 0)
+            {
+                // If successfully created and user wanted to edit, then we open newly created file for editing.
+                return RedirectToAction("Editor", "Files", new {id = nodeID});
+            }
+            else
+            {
+                // Back to project's file listing.
+                if (nodeID > 0)
+                {
+                    return RedirectToAction(nameof(FilesController.Index), "Files", new {id = id, msg = 1, hl = nodeID});
+                }
+                else
+                {
+                    // Showing error.
+                    return RedirectToAction(nameof(FilesController.Index), "Files", new {id = id, msg = -1});
+                }
+            }
         }
 
         public IActionResult Delete(int? id)
@@ -99,7 +116,7 @@ namespace ode.Controllers
 
         public void SaveRevision(int nodeID, int fileRevisionID, string contents)
         {
-            // Only updating the current revision for now.
+            // FIXME: Only updating the current revision for now.
             // Will be changed when implementation of revision functionaly is finished.
             _filesService.UpdateFileRevision(nodeID, fileRevisionID, contents);
         }

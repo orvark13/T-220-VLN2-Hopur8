@@ -27,7 +27,7 @@ namespace ode.Controllers
             _usersService = usersService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int? msg, int? hl)
         {
             var currentUserID = _userManager.GetUserId(User);
 
@@ -35,40 +35,94 @@ namespace ode.Controllers
             {
                 Projects = _projectsService.GetUsersProjects(currentUserID),
                 Templates = _projectsService.GetUsersTemplates(currentUserID),
-                CurrentUser = _usersService.GetUserByID(currentUserID)
+                CurrentUser = _usersService.GetUserByID(currentUserID),
+                Notice = new NoticeViewModel()
             };
+
+            if (msg != null) {
+                viewModel.Notice = new NoticeViewModel() {
+                    MessageID = msg ?? 0
+                };
+
+                switch (msg)
+                {
+                    case -1:
+                        viewModel.Notice.Message = "Failed to create new project.";
+                        break;
+                    case 1:
+                        viewModel.Notice.Message = "New project successfully created.";
+                        break;
+                    case 2:
+                        viewModel.Notice.Message = "Project has been deleted.";
+                        break;
+                }
+
+                viewModel.Notice.NewID = hl ?? -1;
+            }
             
             return View(viewModel);
         }
 
         [HttpPost]
-        public IActionResult Post(int? id, string name, bool template = false)
+        public IActionResult Create(string name, bool template = false)
         {
-            if (id == null)
+            var currentUserID = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(name))
             {
-                // /Projects/Post => new project
-                var currentUserID = _userManager.GetUserId(User);
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    name = "New Project";
-                }
-                var projectId = _projectsService.Create(name, currentUserID);
+                name = "New Project";
+            }
+            var projectId = _projectsService.Create(name, currentUserID);
 
-                _filesService.Create("README.md", projectId, currentUserID, "# README\n\nDescribe you project here.");
+            var projectID = _filesService.Create("README.md", projectId, currentUserID, "# README\n\nWrite something nice here :)");
 
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+            if (projectID > 0)
+            {
+                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = 1, newID = projectID});
             }
             else
             {
-                // /Project/Post/ID
-                // Only know how to update name
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    name = "#" + id.ToString();
-                }
-                _projectsService.UpdateName(id ?? -1, name);
+                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = -1});
+            }
+        }
 
-                return new EmptyResult();
+        [HttpPost]
+        public IActionResult Rename(int id, string name)
+        {
+            if (_projectsService.UpdateName(id, name))
+            {
+                return Json(new { success = true});
+            }
+            else
+            {
+                return Json(new { success = false, error = "Rename failed."});
+            }
+        }
+
+        [HttpPost]
+        public IActionResult Sharing(int id, string sharing)
+        {
+            var userIDs = new List<string>();
+
+            Console.WriteLine("sharing = " + sharing);
+
+            if (sharing != null)
+            {
+                string[] userIDList = sharing.Split(new char[] { ',' });
+                foreach (var userID in userIDList)
+                {
+                    userIDs.Add(userID.Trim());
+                }
+            }
+            
+            Console.WriteLine(userIDs.ToString());
+
+            if (_projectsService.UpdateSharing(id, userIDs))
+            {
+                return Json(new { success = true});
+            }
+            else
+            {
+                return Json(new { success = false, error = "Failed to update project sharing."});
             }
         }
 
@@ -84,6 +138,9 @@ namespace ode.Controllers
             return Json(r);
         }
 
+        // <summary>
+        // 
+        // </summary>
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0)
@@ -93,44 +150,12 @@ namespace ode.Controllers
 
             if (_projectsService.HasAccessToProject(_userManager.GetUserId(User), id ?? -1)) {
                 _projectsService.DeleteProjectByID(id ?? -1);
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = 2});
             }
             else
             {
                 return new ChallengeResult();
             }
-        }
-
-        /*[HttpGet]
-        public IEnumerable<UserSelectItemViewModel> GetUsers(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id)) return null;
-
-            var items = new List<SelectItem>();
-
-            string[] idList = id.Split(new char[] { ',' });
-            foreach (var idStr in idList)
-            {
-                int idInt;
-                if (int.TryParse(idStr, out idInt))
-                {
-                    items.Add(_makes.FirstOrDefault(m => m.id == idInt));
-                }
-            }
-
-            return items;
-        }*/
-
-        [HttpGet]
-        public ProjectViewModel GetSharing(int id)
-        {
-            return _projectsService.GetProjectByID(id);
-        }
-
-        [HttpPost]
-        public ProjectViewModel PutSharing(int id)
-        {
-            return _projectsService.GetProjectByID(id);
         }
 
         [AllowAnonymous]

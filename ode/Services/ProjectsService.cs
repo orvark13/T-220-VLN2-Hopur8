@@ -65,6 +65,53 @@ namespace ode.Services
             return false;
         }
 
+        public bool UpdateSharing(int projectID, List<string> updatedIDs)
+        {
+            // NOTE, these linq any subqueries produce "will be evaluated locally"
+            // warnings. This is a known issue with .NET Core and EF.
+
+            var currentSharings = _context.Sharings
+                .Where(s => s.ProjectID == projectID);
+            
+            var removeSharings = currentSharings
+                .Where(s => !updatedIDs.Any(s2 => s2 == s.UserID));
+
+            var addSharings = updatedIDs
+                .Where(i => !currentSharings.Any(s => s.UserID == i))
+                .Select(i => new Sharing {
+                    ProjectID = projectID,
+                    UserID = i
+                });
+
+            // FIXME, make sure theese user ID that are being added are actual users.
+            
+            Console.WriteLine("Removing " + removeSharings.Count().ToString());
+            Console.WriteLine("Adding " + addSharings.Count().ToString());
+
+            if (removeSharings.Count() > 0 || addSharings.Count() > 0)
+            {
+                if (removeSharings.Count() > 0)
+                {
+                    _context.Sharings
+                        .RemoveRange(removeSharings);
+
+                    _context.SaveChanges();
+                }
+
+                if (addSharings.Count() > 0)
+                {
+                    _context.Sharings
+                        .AddRange(addSharings);
+
+                    _context.SaveChanges();
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         public List<ProjectListingViewModel> GetUsersProjects(string applicationUserID, bool templates = false)
         {
             var projects = _context.Projects

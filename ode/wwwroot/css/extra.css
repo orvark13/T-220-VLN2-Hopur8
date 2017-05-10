@@ -35,6 +35,10 @@ select.sharing {
     border: 1px solid #aaa !important;
 }
 
+.highlight {
+    background-color: lightyellow;
+}
+
 /* ... */
 
 body.editor .container {
