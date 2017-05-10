@@ -24,4 +24,10 @@ namespace ode.Models.Entities
         public string UserID { get; set; }
 
     }
+
+    public class ProjectSharingJoin
+    {
+        public Project P { get; set; }
+        public Sharing S { get; set; }
+    }
 }

@@ -1,4 +1,10 @@
-﻿@model ode.Models.ProjectsPageViewModel
+﻿@using Microsoft.AspNetCore.Identity
+@using ode.Models
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@model ode.Models.ProjectsPageViewModel
 
 @{
     ViewData["Title"] = "Projects";
@@ -9,7 +15,7 @@
     <button class="btn btn-success pull-right" data-toggle="modal" data-target="#newProjectModal"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New Project</button>
 </h2>
 
-@if(@Model.Notice.MessageID != 0) {
+@if (@Model.Notice.MessageID != 0) {
     <div class="alert @(@Model.Notice.MessageID > 0 ? "alert-info" : "alert-warning") alert-dismissible fade in" role=alert>
         <button type=button class=close data-dismiss=alert aria-label=Close><span aria-hidden=true>&times;</span></button>
         <strong>
@@ -20,7 +26,7 @@
     </div>
 }
 
-<h4>Your Projects</h4>
+<h5>Your projects and projects others have shared with you.</h5>
 
 <div class="list-group">
 @foreach (var project in Model.Projects) {
@@ -30,23 +36,24 @@
             <a class="btn btn-danger" asp-action="Delete" asp-route-id="@project.ID">Delete</a>
         </div>
         <h4 class="list-group-item-heading">
-        <span class="list-group-item-heading">@Html.DisplayFor(modelItem => project.Name)</span>
-        @(Model.Notice.NewID == project.ID ? "NEW" : "")
-        <button class="editName btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil
-"></span></button>
-        <button class="updateName btn btn-primary btn-xs hidden" data-pid="@project.ID">OK</button>
-        <small>
-        @Html.DisplayFor(modelItem => project.CreatedByUser.Name)
-        @Html.DisplayFor(modelItem => project.CreatedDate)
-        </small>
+            <span class="list-group-item-heading">@Html.DisplayFor(modelItem => project.Name)</span>
+            <button class="editName btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil
+    "></span></button>
+            <button class="updateName btn btn-primary btn-xs hidden" data-pid="@project.ID">OK</button>
+            <small>
+                @Html.DisplayFor(modelItem => project.CreatedDate)
+                @if (@project.CreatedByUserID != @UserManager.GetUserId(User)) {
+                <span class="label label-warning other" title="Shared by">
+                    @Html.DisplayFor(modelItem => project.CreatedByUser.Name)
+                </span> 
+                }
+            </small>
         </h4>
         <p class="list-group-item-text sharedWith sharedWith@(project.ID)">
             <span class="text-muted">Shared with:</span><br>
             @if(project.SharedWith.Any()) {
                 <span class="sharing">
-                @foreach (var user in project.SharedWith) {
-                    <span class="select2-selection__choice">@Html.DisplayFor(modelItem => user.Name)</span>
-                }
+                @Html.Raw(string.Join(", ", project.SharedWith.Select(s => s.Name)))
                 </span>
             }
             else
@@ -58,7 +65,7 @@
                 <option value="@(user.ID)" selected="selected">@Html.DisplayFor(modelItem => user.Name)</option>
             }
             </select>
-            <button class="editSharing btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil
+            <button class="editSharing btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-share-alt
 "></span></button>
         </p>
     </div>
@@ -136,11 +143,7 @@
             var name = input.val();
 
             if (name != input.prop("defaultValue")) {
-                $.post("/Home/Rename/" + pid, {'name': name})
-                    .done(function (r) {
-                        alert(r.success);
-                        // TODO get a validated name from the server
-                    });
+                $.post("/Home/Rename/" + pid, {'name': name});
             }
 
             var span = $('<span>' + name + '</span>');
@@ -207,8 +210,8 @@
                 setTimeout(function(){
                     $('this').select2('destroy');
                     $('.project' + pid + ' .select2').remove();
-                    $('.project' + pid + ' .select2-container').hide();
-                }, 50);
+                    $('.project' + pid + ' .select2-container').css("display","none");
+                }, 100);
 
                 p.find('.editSharing').removeClass('hidden');
             });

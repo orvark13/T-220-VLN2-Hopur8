@@ -125,13 +125,35 @@ namespace ode.Services
                     CreatedDate = x.CreatedDate
                 })
                 .ToList();
-            
-            // FIXME also projects shared with you!
 
-            foreach (ProjectListingViewModel p in projects)
+            // Projects others are sharing with you.
+            var othersProjects = _context.Projects
+                .Join(_context.Sharings, p => p.ID, s => s.ProjectID, (p, s) => new ProjectSharingJoin(){ P = p, S = s})
+                .Where(n => n.P.CreatedByUserID != applicationUserID
+                            && n.S.UserID == applicationUserID
+                            && n.P.Template == templates)
+                .Select(x => new ProjectListingViewModel
+                {
+                    ID = x.P.ID,
+                    Name = x.P.Name,
+                    CreatedByUserID = x.P.CreatedByUserID,
+                    Template = x.P.Template,
+                    CreatedDate = x.P.CreatedDate
+                })
+                .ToList();
+
+            foreach (var p in projects)
             {
                 p.SharedWith = SharedWithUsers(p.ID);
                 p.CreatedByUser = _usersService.GetUserByID(p.CreatedByUserID);
+            }
+
+            foreach (var p in othersProjects)
+            {
+                p.SharedWith = SharedWithUsers(p.ID);
+                p.CreatedByUser = _usersService.GetUserByID(p.CreatedByUserID);
+
+                projects.Add(p);
             }
 
             return projects;

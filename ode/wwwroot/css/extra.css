@@ -1,3 +1,7 @@
+h4.list-group-item-heading {
+    font-size: 1.7em;
+    line-height: 1.7em;
+}
 
 div.list-group-item button {
     display: none !important;
@@ -7,12 +11,8 @@ div.list-group-item:hover button:not(.hidden) {
     display: inline-block !important;
 }
 
-.list-group-item h4 {
-    height: 2em;
-}
-
 .list-group-item p {
-    line-height: 2em;
+    line-height: 1.8em;
 }
 
 .list-group input, 
@@ -33,6 +33,10 @@ select.sharing {
 .select2-container--default.select2-container--focus .select2-selection--multiple,
 .select2-container--default .select2-selection--multiple {
     border: 1px solid #aaa !important;
+}
+
+.other {
+    margin-right: 0.3em;
 }
 
 .highlight {
