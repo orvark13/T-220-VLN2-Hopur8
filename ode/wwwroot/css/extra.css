@@ -99,3 +99,7 @@ body.editor .container {
     color: #fff;
     text-decoration: none;
 }
+
+#tb-ws {
+    margin-left: 1em;
+}

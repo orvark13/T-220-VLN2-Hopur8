@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using ode.Data;
 using ode.Models;
 using ode.Services;
+using ode.Middlewares;
 
 namespace ode
 {
@@ -81,6 +82,9 @@ namespace ode
             app.UseStaticFiles();
 
             app.UseIdentity();
+
+            app.UseWebSockets();
+            app.UseWebSocketHandler();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 
