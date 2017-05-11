@@ -1,15 +1,23 @@
 using System;
 using System.Linq;
 using Odie.Models.Entities;
-using Odie.Models; // ApplicationUser
+using Odie.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 
 namespace Odie.Data
 {
+    // <summary>
+    // Initialize the database with test data.
+    // </summary>
     public static class DbInitializer
     {
+        // <summary>
+        // Seeds the database with some initial data.
+        // </summary>
+        // <parameter name="context">The database context.</parameter>
+        // <returns></returns>
         public static void Initialize(ApplicationDbContext context)
         {
             context.Database.EnsureDeleted();
@@ -22,7 +30,7 @@ namespace Odie.Data
                 NormalizedEmail = "ORVARK13@RU.IS",
                 EmailConfirmed = true,
                 LockoutEnabled = false,
-                SecurityStamp = Guid.NewGuid().ToString()               
+                SecurityStamp = Guid.NewGuid().ToString()
             };
             userOrvar.PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(userOrvar, "sesam");
             context.Users.Add(userOrvar);
@@ -34,7 +42,7 @@ namespace Odie.Data
                 NormalizedEmail = "JOHN@THESMITHS.COM",
                 EmailConfirmed = true,
                 LockoutEnabled = false,
-                SecurityStamp = Guid.NewGuid().ToString()               
+                SecurityStamp = Guid.NewGuid().ToString()
             };
             userJohn.PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(userJohn, "jane4ever");
             context.Users.Add(userJohn);
@@ -46,7 +54,7 @@ namespace Odie.Data
                 NormalizedEmail = "JANE@THESMITHS.COM",
                 EmailConfirmed = true,
                 LockoutEnabled = false,
-                SecurityStamp = Guid.NewGuid().ToString()               
+                SecurityStamp = Guid.NewGuid().ToString()
             };
             userJane.PasswordHash = new PasswordHasher<ApplicationUser>().HashPassword(userJane, "h8john");
             context.Users.Add(userJane);
@@ -80,7 +88,7 @@ namespace Odie.Data
             var fileRevisions = new FileRevision[]
             {
                 new FileRevision {
-                    NodeID = 1, //nodes[0].ID,
+                    NodeID = 1,
                     Description = "Initial version",
                     Contents = System.Text.Encoding.UTF8.GetBytes("Hello World"),
                     CreatedByUserID = userOrvar.Id,
@@ -119,15 +127,15 @@ namespace Odie.Data
             var sharings = new Sharing[]
             {
                 new Sharing {
-                    ProjectID = 1, //projects[0].ID,
+                    ProjectID = 1,
                     UserID = userJohn.Id
                 },
                 new Sharing {
-                    ProjectID = 1, //projects[0].ID,
+                    ProjectID = 1,
                     UserID = userJane.Id
                 },
                 new Sharing {
-                    ProjectID = 2, //projects[1].ID,
+                    ProjectID = 2,
                     UserID = userJane.Id
                 },
             };

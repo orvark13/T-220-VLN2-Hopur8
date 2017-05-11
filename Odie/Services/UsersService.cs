@@ -9,17 +9,23 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Odie.Services
 {
+    // <summary>
+    // UserService add a couple of user searching methods to ApplicationUser.
+    // </summary>
     public class UsersService
     {
-        //private UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
 
-        public UsersService(ApplicationDbContext context/*, UserManager<ApplicationUser> userManager*/)
+        public UsersService(ApplicationDbContext context)
         {
-            //_userManager = userManager;
             _context = context;
         }
 
+        // <summary>
+        // Get a list of users whose names match a search string.
+        // </summary>
+        // <parameter name="partial">User name search query</parameter>
+        // <returns>A list of zero or more users.</returns>
         public List<UserSelectItemViewModel> GetUsersMatchingName(string partial)
         {
             var users = _context.Users.Where(m => m.UserName.ToLower().Contains(partial.ToLower()))
@@ -31,9 +37,14 @@ namespace Odie.Services
                 .Take(10)
                 .ToList();
 
-            return users;            
+            return users;
         }
 
+        // <summary>
+        // Get a user view model for the user with the specified ID.
+        // </summary>
+        // <parameter name="userID">A user ID.</parameter>
+        // <returns></returns>
         public UserViewModel GetUserByID(string userID)
         {
             var applicationUser = _context.Users
