@@ -39,8 +39,9 @@ namespace Odie.Services
 
         public bool HasAccessToProject(string userID, int projectID)
         {
-            return _context.Projects.SingleOrDefault(p => p.ID == projectID && p.CreatedByUserID == userID) != null
-                || SharedWithUsers(projectID).Any(x => x.ID == userID);
+            return _context.Projects
+                .SingleOrDefault(p => p.ID == projectID && p.CreatedByUserID == userID) != null
+                                || SharedWithUsers(projectID).Any(x => x.ID == userID);
         }
 
         public bool HasAccessToFile(string userID, int fileID)
@@ -67,7 +68,7 @@ namespace Odie.Services
 
         public bool UpdateSharing(int projectID, List<string> updatedIDs)
         {
-            // NOTE, these linq any subqueries produce "will be evaluated locally"
+            // NOTE, these Linq Any subqueries produce "evaluated locally"
             // warnings. This is a known issue with .NET Core and EF.
 
             var currentSharings = _context.Sharings
@@ -178,7 +179,7 @@ namespace Odie.Services
                 })
                 .ToList();
 
-            return sharedWithUsers;            
+            return sharedWithUsers;
         }
 
         public void DeleteProjectByID(int projectID)
@@ -207,7 +208,7 @@ namespace Odie.Services
             var project = _context.Projects.SingleOrDefault(p => p.ID == projectID && p.Template == false);
             if (project == null)
             {
-                return new ProjectViewModel();
+                return null;
             }
 
             var files = _context.Nodes
@@ -244,7 +245,6 @@ namespace Odie.Services
                 MainFile = mainFile,
                 CreatedByUserID = project.CreatedByUserID,
                 CreatedByUser = createdByUser,
-                // Template
                 CreatedDate = project.CreatedDate,
 
                 SharedWith = sharedWith,
