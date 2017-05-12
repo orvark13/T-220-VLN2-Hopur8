@@ -8,6 +8,16 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
+/*
+    TODO: WS Server Improvements
+
+        * Use thread safe collection for websockets instead of List.
+        * Store document deltas in a list, new clients get the list on connection.
+        * Group clients into document pools, only broadcast within pools.
+        * Provide online users count within pool groups.
+
+ */
+
 namespace Odie.Middlewares
 {
     /// <summary>
