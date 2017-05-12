@@ -34,6 +34,11 @@ namespace Odie.Controllers
 
             var viewModel = _projectsService.GetProjectByID(id ?? -1);
 
+            if (viewModel == null)
+            {
+                return NotFound();
+            }
+
             if (_projectsService.HasAccessToProject(_userManager.GetUserId(User), id ?? -1)) {
                 return View(viewModel);
             }
@@ -136,7 +141,7 @@ namespace Odie.Controllers
         {
             // FIXME: Only updating the current revision for now.
             // Will be changed when implementation of revision functionaly is finished.
-            _filesService.UpdateFileRevision(nodeID, fileRevisionID, contents);
+            _filesService.UpdateFileRevision(fileRevisionID, contents);
         }
 
         [AllowAnonymous]

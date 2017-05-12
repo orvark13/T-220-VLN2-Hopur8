@@ -63,7 +63,7 @@ namespace Odie.Data
             var nodes = new Node[]
             {
                 new Node {
-                    Name = "README.txt",
+                    Name = "README.md",
                     ParentNodeID = -1,
                     ProjectID = 1,
                     CreatedByUserID = userOrvar.Id,
@@ -71,7 +71,7 @@ namespace Odie.Data
                     CreatedDate = DateTime.Parse("2017-01-01")
                 },
                 new Node {
-                    Name = "README.txt",
+                    Name = "TODO.md",
                     ParentNodeID = -1,
                     ProjectID = 2,
                     CreatedByUserID = userOrvar.Id,

@@ -12,14 +12,14 @@ using Microsoft.AspNetCore.Identity;
 namespace Odie.Controllers
 {
     [Authorize]
-    public class ProjectsController : Controller
+    public class HomeController : Controller
     {
         private UserManager<ApplicationUser> _userManager;
         private ProjectsService _projectsService;
         private FilesService _filesService;
         private UsersService _usersService;
 
-        public ProjectsController(ProjectsService projectsService, FilesService filesService, UsersService usersService, UserManager<ApplicationUser> userManager)
+        public HomeController(ProjectsService projectsService, FilesService filesService, UsersService usersService, UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
             _projectsService = projectsService;
@@ -77,11 +77,11 @@ namespace Odie.Controllers
 
             if (projectID > 0)
             {
-                return RedirectToAction(nameof(ProjectsController.Index), "Projects", new { msg = 1, newID = projectID});
+                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = 1, newID = projectID});
             }
             else
             {
-                return RedirectToAction(nameof(ProjectsController.Index), "Projects", new { msg = -1});
+                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = -1});
             }
         }
 
@@ -150,7 +150,7 @@ namespace Odie.Controllers
 
             if (_projectsService.HasAccessToProject(_userManager.GetUserId(User), id ?? -1)) {
                 _projectsService.DeleteProjectByID(id ?? -1);
-                return RedirectToAction(nameof(ProjectsController.Index), "Projects", new { msg = 2});
+                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = 2});
             }
             else
             {

@@ -44,7 +44,7 @@ namespace Odie.Services
         // Get a user view model for the user with the specified ID.
         // </summary>
         // <parameter name="userID">A user ID.</parameter>
-        // <returns></returns>
+        // <returns>A user's view model.</returns>
         public UserViewModel GetUserByID(string userID)
         {
             var applicationUser = _context.Users

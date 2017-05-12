@@ -8,17 +8,24 @@ using Odie.Data;
 
 namespace Odie.Services
 {
+    // <summary>
+    // Handles files and file revisions .
+    // </summary>
     public class FilesService
     {
         private readonly ApplicationDbContext _context;
         private readonly UsersService _usersService;
-        
+
         public FilesService(ApplicationDbContext context, UsersService usersService)
         {
             _context = context;
             _usersService = usersService;
         }
 
+        // <summary>
+        // Create new a new file within the specified project and give it the specified name.
+        // Also create a file revision in the process with the given contents.
+        // </summary>
         public int Create(string fileName, int projectID, string userID, string contents)
         {
             var node = new Node()
@@ -49,11 +56,17 @@ namespace Odie.Services
             return node.ID;
         }
 
+        // <summary>
+        // Fetch the ID of the project the file node with the ID belongs to.
+        // </summary>
         public int GetFilesProjectID(int nodeID)
         {
             return _context.Nodes.SingleOrDefault(n => n.ID == nodeID).ProjectID;
         }
 
+        // <summary>
+        // Fetch a view model version of the specified file.
+        // </summary>
         public FileViewModel GetFile(int nodeID)
         {
             var file = _context.Nodes
@@ -74,6 +87,9 @@ namespace Odie.Services
             return file;
         }
 
+        // <summary>
+        // Fetch a view model version of the specified file revision.
+        // </summary>
         public FileRevisionViewModel GetFileRevision(int nodeID, int? fileRevisionID)
         {
             var revision = new FileRevisionViewModel();
@@ -113,7 +129,10 @@ namespace Odie.Services
             return revision;
         }
 
-        public void UpdateFileRevision(int nodeID, int fileRevisionID, string contents)
+        // <summary>
+        // Overwrite the contents of the specified file revision with the given contents.
+        // </summary>
+        public void UpdateFileRevision(int fileRevisionID, string contents)
         {
             var revision = _context.FileRevisions
                 .SingleOrDefault(r => r.ID == fileRevisionID);
@@ -128,6 +147,9 @@ namespace Odie.Services
             _context.SaveChanges();
         }
 
+        // <summary>
+        // Delete the file that has the specified ID.
+        // </summary>
         public void DeleteFileByID(int nodeID)
         {
             var node = _context.Nodes
@@ -149,6 +171,9 @@ namespace Odie.Services
             _context.SaveChanges();
         }
 
+        // <summary>
+        // Delete all file nodes that belong to the specified project.
+        // </summary>
         public void DeleteFilesByProjectID(int projectID)
         {
             var nodes = _context.Nodes
@@ -167,6 +192,12 @@ namespace Odie.Services
             _context.SaveChanges();
         }
 
+        // <summary>
+        // Checks if there is a files with the specified name in the given project.
+        // </summary>
+        // <parameter name="context">Project ID.</parameter>
+        // <parameter name="context">Filename.</parameter>
+        // <returns>True if a file with the given name exists, false otherwise.</returns>
         public bool IsNameUnique(int projectID, string name)
         {
             var node = _context.Nodes
@@ -181,6 +212,10 @@ namespace Odie.Services
             return true;
         }
 
+        // <summary>
+        // Renames the file with the specified node name.
+        // </summary>
+        // <returns>True if successful, false otherwise.</returns>
         public bool UpdateName(int nodeID, string name)
         {
             if (name.Length > 0)

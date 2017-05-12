@@ -76,7 +76,7 @@ namespace Odie
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Projects/Error");
             }
 
             app.UseStaticFiles();
@@ -92,7 +92,7 @@ namespace Odie
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}/{nid?}");
+                    template: "{controller=Projects}/{action=Index}/{id?}/{nid?}");
             });
 
             // Seed the Database

@@ -87,7 +87,7 @@
 -->
 
 <div class="modal fade" id="newProjectModal" tabindex="-1" role="dialog" aria-labelledby="newProjectModalLabel">
-    <form asp-area="" asp-controller="Projects" asp-action="Create" method="post">
+    <form asp-area="" asp-controller="Home" asp-action="Create" method="post">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -143,7 +143,7 @@
             var name = input.val();
 
             if (name != input.prop("defaultValue")) {
-                $.post("/Projects/Rename/" + pid, {'name': name});
+                $.post("/Home/Rename/" + pid, {'name': name});
             }
 
             var span = $('<span>' + name + '</span>');
@@ -167,7 +167,7 @@
                 closeOnSelect: true,
                 formatInputTooShort: function () {return '';},
                 ajax: {
-                    url: "/Projects/MatchingUsers/",
+                    url: "/Home/MatchingUsers/",
                     dataType: 'json',
                     delay: 100,
                     processResults: function (data, params) {
@@ -200,7 +200,7 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "/Projects/Sharing/" + pid,
+                    url: "/Home/Sharing/" + pid,
                     data: {'sharing': selectionIDs.join(",")},
                     dataType: "json",
                     success: function(data) { /* TODO */ },
