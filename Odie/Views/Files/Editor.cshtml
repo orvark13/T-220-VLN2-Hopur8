@@ -8,6 +8,10 @@
 
 @model EditorViewModel
 
+@{
+    ViewData["Title"] = "Editor";
+}
+
 <div id="editor">@Html.Raw(Model.FileRevision.Contents)</div>
 <div id="preview"></div>
 
@@ -44,12 +48,14 @@
 
             $('#preview').html(converter.makeHtml(editor.getSession().getValue()));
 
+            /* Leaving page by clicking links. */
             $('#tb-files,#tb-projects').on('click', function (e) {
                 if (dirty && !confirm("Unsaved changes might be lost.\n\nAre your sure you want to leave the editor?")) {
                     e.preventDefault();
                 } 
             });
 
+            /* Save button in toolbar. */
             $('#tb-save').on('click', function () {
                 if (dirty) {
                 $.post("/Files/SaveRevision/", {
@@ -70,13 +76,14 @@
                 }
             });
 
+            /* Preview toggle in toolbar. */
             $("#tb-preview").click(function () {
                 $("#editor").toggleClass("full");
                 $("#preview").toggleClass("hidden");
                 $(this).find('span').toggleClass("glyphicon glyphicon-eye-open").toggleClass("glyphicon glyphicon-eye-close");
             });
 
-            /* WebSockets */
+            /* WebSockets client. */
 
             var wsIconTimer;
             function setWsIcon(up) {
@@ -169,6 +176,7 @@
                 webSocket.close();
             };
 
+            /* Websocket button in toolbar. */
             $("#tb-ws").click(function () {
                 if (webSocket.readyState == WebSocket.OPEN) {
                     /* User closes connection manually. */

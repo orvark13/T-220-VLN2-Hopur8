@@ -8,6 +8,9 @@ using Odie.Data;
 
 namespace Odie.Services
 {
+    /// <summary>
+    /// Project handling.
+    /// </summary>
     public class ProjectsService
     {
         private readonly ApplicationDbContext _context;
@@ -21,6 +24,9 @@ namespace Odie.Services
             _filesService = filesService;
         }
 
+        /// <summary>
+        /// Create project owned be indicated user and with given name.
+        /// </summary>
         public int Create(string name, string userID)
         {
             var project = new Project()
@@ -37,6 +43,9 @@ namespace Odie.Services
             return project.ID;
         }
 
+        /// <summary>
+        /// Check if user with given ID has access to the project specified.
+        /// </summary>
         public bool HasAccessToProject(string userID, int projectID)
         {
             return _context.Projects
@@ -44,11 +53,17 @@ namespace Odie.Services
                                 || SharedWithUsers(projectID).Any(x => x.ID == userID);
         }
 
+        /// <summary>
+        /// Check if user with given ID has access to the file specified.
+        /// </summary>
         public bool HasAccessToFile(string userID, int fileID)
         {
             return HasAccessToProject(userID, _filesService.GetFilesProjectID(fileID));
         }
 
+        /// <summary>
+        /// Rename project.
+        /// </summary>
         public bool UpdateName(int projectID, string name)
         {
             if (name.Length > 0)
@@ -66,6 +81,9 @@ namespace Odie.Services
             return false;
         }
 
+        /// <summary>
+        /// Update sharing of project according to provided list.
+        /// </summary>
         public bool UpdateSharing(int projectID, List<string> updatedIDs)
         {
             // NOTE, these Linq Any subqueries produce "evaluated locally"
@@ -111,6 +129,9 @@ namespace Odie.Services
             return false;
         }
 
+        /// <summary>
+        /// Get a list of users projects for use in view.
+        /// </summary>
         public List<ProjectListingViewModel> GetUsersProjects(string applicationUserID, bool templates = false)
         {
             var projects = _context.Projects
@@ -163,6 +184,9 @@ namespace Odie.Services
             return GetUsersProjects(applicationUserID, true);
         }
 
+        /// <summary>
+        /// Get a list of users who have access to the specified project for use in view.
+        /// </summary>
         public List<UserViewModel> SharedWithUsers(int projectID)
         {
             var sharedWithUserIDs = _context.Sharings
@@ -182,6 +206,9 @@ namespace Odie.Services
             return sharedWithUsers;
         }
 
+        /// <summary>
+        /// Delete the project specified.
+        /// </summary>
         public void DeleteProjectByID(int projectID)
         {
             if (projectID < 0)
@@ -203,6 +230,9 @@ namespace Odie.Services
             _filesService.DeleteFilesByProjectID(projectID);
         }
 
+        /// <summary>
+        /// Get single project data for use in view.
+        /// </summary>
         public ProjectViewModel GetProjectByID(int projectID)
         {
             var project = _context.Projects.SingleOrDefault(p => p.ID == projectID && p.Template == false);

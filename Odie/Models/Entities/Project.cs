@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Odie.Models.Entities
 {
     /// <summary>
-    /// TODO
+    /// Project data.
     /// </summary>
     public class Project
     {
@@ -18,12 +18,15 @@ namespace Odie.Models.Entities
 
         public string Name { get; set; }
 
-        public int MainNodeID { get; set; } // Mainfile
+        /// <summary>
+        /// The node ID of the main file in the project.
+        /// </summary>
+        public int MainNodeID { get; set; }
 
         public bool Template { get; set; }
 
         [MaxLength(450)]
-        public string CreatedByUserID { get; set; } // CreatedBy
+        public string CreatedByUserID { get; set; }
 
         //public ICollection<ApplicationUser> SharedWith { get; set; }
         

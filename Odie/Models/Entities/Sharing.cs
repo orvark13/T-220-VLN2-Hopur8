@@ -8,13 +8,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Odie.Models.Entities
 {
     /// <summary>
-    /// TODO
+    /// Sharing, which projects have been shared with wich users.
+    /// Needed so EF would create the corresponding db table.
     /// </summary>
     public class Sharing
     {
-        /// <summary>
-        /// 
-        /// </summary>
         //[Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int ProjectID { get; set; }
@@ -25,6 +23,9 @@ namespace Odie.Models.Entities
 
     }
 
+    /// <summary>
+    /// Helper entity used in a Linq inner join.
+    /// </summary>
     public class ProjectSharingJoin
     {
         public Project P { get; set; }

@@ -27,6 +27,11 @@ namespace Odie.Controllers
             _filesService = filesService;
         }
 
+        /// <summary>
+        /// Generate a page with a list of files in the project with the given id.
+        /// </summary>
+        /// <parameter name="msg">Numer of a standard message to show in the view.</parameter>
+        /// <parameter name="hl">Id of a file whose listing should be highlighted in the view.</parameter>
         public IActionResult Index(int? id, int? msg, int? hl)
         {
             if (id == null || id == 0)
@@ -74,10 +79,15 @@ namespace Odie.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a file in the indicated project and give it the provided name.
+        /// </summary>
+        /// <parameter name="id">Project ID that the should file belong to.</parameter>
+        /// <parameter name="name">Filename.</parameter>
+        /// <parameter name="open">Should the newly created file be opened in the editor.</parameter>
         [HttpPost]
         public IActionResult Create(int id, string name, string open)
         {
-            // /Files/Create/pID => new file in project
             var currentUserID = _userManager.GetUserId(User);
 
             if (string.IsNullOrWhiteSpace(name)

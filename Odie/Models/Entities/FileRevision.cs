@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Odie.Models.Entities
 {
     /// <summary>
-    /// TODO
+    /// Revisions editions of the contents of a given file node.
     /// </summary>
     public class FileRevision
     {
@@ -25,7 +25,7 @@ namespace Odie.Models.Entities
         public byte[] Contents { get; set; }
 
         [MaxLength(450)]
-        public string CreatedByUserID { get; set; } // CreatedBy
+        public string CreatedByUserID { get; set; }
 
         public DateTime CreatedDate { get; set; }
     }

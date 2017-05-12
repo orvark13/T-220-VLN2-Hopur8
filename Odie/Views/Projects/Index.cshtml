@@ -64,8 +64,7 @@
                 <option value="@(user.ID)" selected="selected" disabled="disabled">@Html.DisplayFor(modelItem => user.Name)</option>
             }
             </select>
-            <button class="editSharing btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-share-alt
-"></span></button>
+            <button class="editSharing btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-share-alt"></span></button>
             <button class="updateSharing btn btn-primary btn-xs hidden" data-pid="@project.ID">OK</button>
         </p>
     </div>
@@ -217,6 +216,7 @@
             p.find('.updateSharing').removeClass('hidden');
         });
 
+        /* Remove highlighting and hide alerts shortly after displaying page. */
         $(document).ready(function () {
             setTimeout(function () {
                 $('.alert').alert('close');

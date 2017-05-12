@@ -6,6 +6,10 @@
 
 @model Odie.Models.ViewModels.FilesPageViewModel
 
+@{
+    ViewData["Title"] = "Project files";
+}
+
 <h2>
     @Html.DisplayFor(modelItem => Model.Project.Name)
     <small>
@@ -118,6 +122,7 @@
 {
     <script>
         $(document).ready(function () {
+            /* Remove highlighting and hide alerts shortly after displaying page. */
             setTimeout(function () {
                 $('.alert').alert('close');
                 $('.highlight').removeClass('highlight');
@@ -143,6 +148,7 @@
                 }, 500);
             });
 
+            /* New file button. */
             $(document).on("click", ".createFile", function (e) {
                 e.preventDefault();
                 $.post("/Files/ValidateName/@Model.Project.ID", {'name': $('#name-field').val()})
@@ -156,69 +162,61 @@
                     });
             });
 
+            $(document).on("click", ".editName", function () {
+                var pid = $(this).attr('data-pid');
+                var p = $('.file' + pid);
 
-        $(document).on("click", ".editName", function () {
-            var pid = $(this).attr('data-pid');
-            var p = $('.file' + pid);
+                p.find('.editName').addClass('hidden');
+                p.find('.updateName').removeClass('hidden');
 
-            p.find('.editName').addClass('hidden');
-            p.find('.updateName').removeClass('hidden');
-
-            var span = p.find('span').first();
-            var spanWidth = (Math.max(span.outerWidth(true) + 10), 150) + 'px';
-            var input = $('<input />', {
-                'type': 'text',
-                'value': span.text()
-            });
-            span.replaceWith(input);
-            input.outerWidth(spanWidth);
-            input.focus().select();
-            input.blur(function () {
-                p.find('.updateName').trigger('click');
-            });
-        });
-
-        $(document).on("click", ".updateName", function () {
-            var pid = $(this).attr('data-pid');
-            var p = $('.file' + pid);
-
-            var input = p.find('input').first();
-            var name = input.val();
-
-            if (name === "") {
-                input.addClass('needsfixin').focus().delay(500).queue(function () {
-                    $(this).removeClass("needsfixin").dequeue();
+                var span = p.find('span').first();
+                var spanWidth = (Math.max(span.outerWidth(true) + 10), 150) + 'px';
+                var input = $('<input />', {
+                    'type': 'text',
+                    'value': span.text()
                 });
-                return;
-            }
+                span.replaceWith(input);
+                input.outerWidth(spanWidth);
+                input.focus().select();
+                input.blur(function () {
+                    p.find('.updateName').trigger('click');
+                });
+            });
 
-            p.find('.updateName').prop('disabled', true);
+            $(document).on("click", ".updateName", function () {
+                var pid = $(this).attr('data-pid');
+                var p = $('.file' + pid);
 
-            if (name != input.prop("defaultValue")) {
-                $.post("/Files/Rename/" + pid, {'name': name})
-                    .done(function (r) {
-                        if (r.success == true) {
-                            var span = $('<span>' + name + '</span>');
-                            input.replaceWith(span);
+                var input = p.find('input').first();
+                var name = input.val();
 
-                            p.find('.updateName').prop('disabled', false).addClass('hidden');
-                            p.find('.editName').removeClass('hidden');
-                        } else {
-                            p.find('.updateName').prop('disabled', false);
-                            input.addClass('needsfixin').focus().delay(500).queue(function () {
-                                $(this).removeClass("needsfixin").dequeue();
-                            });
-                        }
+                if (name === "") {
+                    input.addClass('needsfixin').focus().delay(500).queue(function () {
+                        $(this).removeClass("needsfixin").dequeue();
                     });
-            }
-        });
+                    return;
+                }
 
-        $(document).ready(function () {
-            setTimeout(function () {
-                $('.alert').alert('close');
-                $('.highlight').removeClass('highlight');
-            }, 3000);
-        });
+                p.find('.updateName').prop('disabled', true);
+
+                if (name != input.prop("defaultValue")) {
+                    $.post("/Files/Rename/" + pid, {'name': name})
+                        .done(function (r) {
+                            if (r.success == true) {
+                                var span = $('<span>' + name + '</span>');
+                                input.replaceWith(span);
+
+                                p.find('.updateName').prop('disabled', false).addClass('hidden');
+                                p.find('.editName').removeClass('hidden');
+                            } else {
+                                p.find('.updateName').prop('disabled', false);
+                                input.addClass('needsfixin').focus().delay(500).queue(function () {
+                                    $(this).removeClass("needsfixin").dequeue();
+                                });
+                            }
+                        });
+                }
+            });
 
         });
     </script>

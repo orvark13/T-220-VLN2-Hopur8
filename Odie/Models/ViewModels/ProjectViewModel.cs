@@ -5,9 +5,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Odie.Models.ViewModels
 {
+    /// <summary>
+    /// Project data to be used in the UI view.
+    /// </summary>
     public class ProjectViewModel
     {
-        //TODO
         public int ID { get; set; }
         public string Name { get; set; }
         public int MainNodeID { get; set; }
@@ -44,7 +46,6 @@ namespace Odie.Models.ViewModels
     /// </summary>
     public class ProjectsPageViewModel
     {
-        // TODO
         public NoticeViewModel Notice { get; set; }
         public IEnumerable<ProjectListingViewModel> Projects { get; set; }
         public IEnumerable<ProjectListingViewModel> Templates { get; set; }

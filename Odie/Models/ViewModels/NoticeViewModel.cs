@@ -2,7 +2,7 @@
 namespace Odie.Models.ViewModels
 {
     /// <summary>
-    /// Holds notification data for use in views.
+    /// Holds notification data for users to be used in views.
     /// </summary>
     public class NoticeViewModel
     {

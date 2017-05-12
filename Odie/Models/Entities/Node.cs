@@ -12,7 +12,7 @@ namespace Odie.Models.Entities
     }
 
     /// <summary>
-    /// TODO
+    /// File node metadata.
     /// </summary>
     public class Node
     {
@@ -23,7 +23,10 @@ namespace Odie.Models.Entities
 
         public string Name { get; set; }
 
-        public int ParentNodeID { get; set; } // Parent folder
+        /// <summary>
+        /// The node ID of the parent folder.
+        /// </summary>
+        public int ParentNodeID { get; set; }
 
         public int ProjectID { get; set; }
 
@@ -32,7 +35,6 @@ namespace Odie.Models.Entities
 
         public NodeType Type { get; set; }
 
-        //TODO MimeTypeID ...
         public DateTime CreatedDate { get; set; }
     }
 }

@@ -10,6 +10,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Odie.Middlewares
 {
+    /// <summary>
+    /// Websocket server to handle user editor collaboration messages.
+    /// </summary>
     public class WebSocketMiddleware
     {
         private readonly RequestDelegate _next;
@@ -58,8 +61,7 @@ namespace Odie.Middlewares
                                             await s.SendAsync(buffer, type, true, CancellationToken.None);
                                         }
                                     });
-                                    
-                                    //await webSocket.SendAsync(buffer, type, true, CancellationToken.None);
+
                                     break;
                                 case WebSocketMessageType.Close:
                                     await webSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
@@ -72,7 +74,7 @@ namespace Odie.Middlewares
                         {
                             // NOTE: https://github.com/aspnet/AspNetCoreModule/issues/77
                             // System.Net.WebSockets.WebSocketException
-                            Console.WriteLine("Exception: {0}", e);
+                            Console.WriteLine("Odie - Exception: {0}", e);
                             throw(e);
                         }
 

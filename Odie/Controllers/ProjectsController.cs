@@ -28,6 +28,11 @@ namespace Odie.Controllers
             _usersService = usersService;
         }
 
+        /// <summary>
+        /// Generate a page with a list of the projects the current user has access to.
+        /// </summary>
+        /// <parameter name="msg">Numer of a standard message to show in the view.</parameter>
+        /// <parameter name="hl">Id of project whose listing should be highlighted in the view.</parameter>
         public IActionResult Index(int? msg, int? hl)
         {
             var currentUserID = _userManager.GetUserId(User);
@@ -62,6 +67,9 @@ namespace Odie.Controllers
             return View(viewModel);
         }
 
+        /// <summary>
+        /// POST to give create a project (or template) and give it the provided name.
+        /// </summary>
         [HttpPost]
         public IActionResult Create(string name, bool template = false)
         {
@@ -85,6 +93,9 @@ namespace Odie.Controllers
         }
 
         [HttpPost]
+        /// <summary>
+        /// POST to give the provided name to the project with given id. Reply in JSON indicates success or error, and reason.
+        /// </summary>
         public IActionResult Rename(int id, string name)
         {
             if (_projectsService.UpdateName(id, name))
@@ -97,6 +108,9 @@ namespace Odie.Controllers
             }
         }
 
+        /// <summary>
+        /// Update the list of users that have acccess to the provided project ID so it matches the POSTed string with comma seperated userIDs.
+        /// </summary>
         [HttpPost]
         public IActionResult Sharing(int id, string sharing)
         {
@@ -125,6 +139,9 @@ namespace Odie.Controllers
             }
         }
 
+        /// <summary>
+        /// Reply to GET with a list in JSON of users (id, text) whose names (partially) match the given query term.
+        /// </summary>
         [HttpGet]
         public JsonResult MatchingUsers(string term)
         {
@@ -137,9 +154,9 @@ namespace Odie.Controllers
             return Json(r);
         }
 
-        // <summary>
-        // 
-        // </summary>
+        /// <summary>
+        /// Delete project with given ID and redirect to Projects page.
+        /// </summary>
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0)
