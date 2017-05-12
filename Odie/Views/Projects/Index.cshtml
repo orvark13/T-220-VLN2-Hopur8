@@ -37,13 +37,12 @@
         </div>
         <h4 class="list-group-item-heading">
             <span class="list-group-item-heading">@Html.DisplayFor(modelItem => project.Name)</span>
-            <button class="editName btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil
-    "></span></button>
+            <button class="editName btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-pencil"></span></button>
             <button class="updateName btn btn-primary btn-xs hidden" data-pid="@project.ID">OK</button>
             <small>
                 @Html.DisplayFor(modelItem => project.CreatedDate)
                 @if (@project.CreatedByUserID != @UserManager.GetUserId(User)) {
-                <span class="label label-warning other" title="Shared by">
+                <span class="label label-warning other" title="This project is owned by another user.">
                     @Html.DisplayFor(modelItem => project.CreatedByUser.Name)
                 </span> 
                 }
@@ -62,29 +61,16 @@
             }
             <select class="sharing hidden" data-pid="@project.ID" multiple="multiple">
             @foreach (var user in project.SharedWith) {
-                <option value="@(user.ID)" selected="selected">@Html.DisplayFor(modelItem => user.Name)</option>
+                <option value="@(user.ID)" selected="selected" disabled="disabled">@Html.DisplayFor(modelItem => user.Name)</option>
             }
             </select>
             <button class="editSharing btn btn-xs" data-pid="@project.ID"><span class="glyphicon glyphicon-share-alt
 "></span></button>
+            <button class="updateSharing btn btn-primary btn-xs hidden" data-pid="@project.ID">OK</button>
         </p>
     </div>
 }
 </div>
-
-<!--
-<p>Templates:</p>
-<ul>
-@foreach (var template in Model.Templates) {
-    <li>
-        @Html.DisplayFor(modelItem => template.Name)
-        @Html.DisplayFor(modelItem => template.CreatedByUser.Name)
-        @Html.DisplayFor(modelItem => template.CreatedDate)
-        <a asp-action="Sharing" asp-route-id="@template.ID">Sharing</a>
-    </li>
-}
-</ul>
--->
 
 <div class="modal fade" id="newProjectModal" tabindex="-1" role="dialog" aria-labelledby="newProjectModalLabel">
     <form asp-area="" asp-controller="Projects" asp-action="Create" method="post">
@@ -137,10 +123,17 @@
             var pid = $(this).attr('data-pid');
             var p = $('.project' + pid);
 
-            p.find('.updateName').prop('disabled', true);
-
             var input = p.find('input').first();
             var name = input.val();
+
+            if (name === "") {
+                input.addClass('needsfixin').focus().delay(500).queue(function () {
+                    $(this).removeClass("needsfixin").dequeue();
+                });
+                return;
+            }
+
+            p.find('.updateName').prop('disabled', true);
 
             if (name != input.prop("defaultValue")) {
                 $.post("/Projects/Rename/" + pid, {'name': name});
@@ -151,6 +144,44 @@
 
             p.find('.updateName').prop('disabled', false).addClass('hidden');
             p.find('.editName').removeClass('hidden');
+        });
+
+        $(document).on("click", ".updateSharing", function () {
+            var pid = $(this).attr('data-pid');
+            var p = $('.project' + pid);
+            
+            var sharing = p.find('select.sharing').first();
+            var sharingSpan = p.find('span.sharing').first();
+
+                var selectedOptions = p.find('select option:selected');
+                var selections = $.map(selectedOptions, function (el, i) {return $(el).text();});
+                var selectionIDs = $.map(selectedOptions, function (el, i) {return $(el).val();});
+                if (selections.length) {
+                    sharingSpan.text(selections.join(", "));
+                } else {
+                    sharingSpan.html("<em>None.</em>");
+                }
+                sharingSpan.removeClass('hidden');
+                console.log(selections);
+                console.log(selectionIDs);
+                console.log(selections.join(", "));
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Projects/Sharing/" + pid,
+                    data: {'sharing': selectionIDs.join(",")},
+                    dataType: "json",
+                    failure: function(data) { Console.log('Sharing update failed!'); },
+                });
+
+                setTimeout(function () {
+                    $('this').select2('destroy');
+                    $('.project' + pid + ' .select2').remove();
+                    $('.project' + pid + ' .select2-container').css("display","none");
+                }, 100);
+
+                p.find('.editSharing').removeClass('hidden');
+                p.find('.updateSharing').addClass('hidden');
         });
 
         $(document).on("click", ".editSharing", function () {
@@ -171,7 +202,6 @@
                     dataType: 'json',
                     delay: 100,
                     processResults: function (data, params) {
-                        // TODO remove already existing
                         return {
                             results: data.items
                         }
@@ -183,60 +213,9 @@
             sharing.focus();
             sharingSpan.addClass("hidden");
 
-            sharing.on("change", function(e) {
-
-                var selectedOptions = p.find('select option:selected');
-                var selections = $.map(selectedOptions, function (el, i) {return $(el).text();});
-                var selectionIDs = $.map(selectedOptions, function (el, i) {return $(el).val();});
-                if (selections.length) {
-                    sharingSpan.text(selections.join(", "));
-                } else {
-                    sharingSpan.html("<em>None.</em>");
-                }
-                sharingSpan.removeClass('hidden');
-                console.log(selections);
-                console.log(selectionIDs);
-                console.log(selections.join(", "));
-
-                $.ajax({
-                    type: "POST",
-                    url: "/Projects/Sharing/" + pid,
-                    data: {'sharing': selectionIDs.join(",")},
-                    dataType: "json",
-                    success: function(data) { /* TODO */ },
-                    failure: function(data) { Console.log('Sharing update failed!'); },
-                });
-
-                setTimeout(function(){
-                    $('this').select2('destroy');
-                    $('.project' + pid + ' .select2').remove();
-                    $('.project' + pid + ' .select2-container').css("display","none");
-                }, 100);
-
-                p.find('.editSharing').removeClass('hidden');
-            });
-
             p.find('.editSharing').addClass('hidden');
+            p.find('.updateSharing').removeClass('hidden');
         });
-
-        $(document).on("click", ".updateSharing", function () {
-            var pid = $(this).attr('data-pid');
-            var p = $('.project' + pid);
-
-            var sharingSpan = p.find('span.sharing').first();
-
-            p.find('.editSharing').prop('disabled', true);
-        });
-
-        $(document).on("click", ".updateSharing", function () {
-            var pid = $(this).attr('data-pid');
-            var p = $('.project' + pid);
-
-            var sharingSpan = p.find('span.sharing').first();
-
-            p.find('.editSharing').prop('disabled', true);
-        });
-
 
         $(document).ready(function () {
             setTimeout(function () {

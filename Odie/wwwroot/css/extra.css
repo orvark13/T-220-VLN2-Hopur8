@@ -1,3 +1,5 @@
+/* Projects and Files listings. */
+
 h4.list-group-item-heading {
     font-size: 1.7em;
     line-height: 1.7em;
@@ -23,18 +25,13 @@ tr:hover button:not(.hidden) {
     max-width: 100% !important;
 }
 
-.select2-selection, .select2-results, .select2-container, .select2-dropdown {
-    min-width: 100%;
-    width: 100%;
-}
-
-select.sharing {
-    width: 100%;
-}
-
 .select2-container--default.select2-container--focus .select2-selection--multiple,
 .select2-container--default .select2-selection--multiple {
     border: 1px solid #aaa !important;
+}
+
+span.sharing {
+    font-size: 1.1em;
 }
 
 .other {
@@ -45,7 +42,11 @@ select.sharing {
     background-color: lightyellow;
 }
 
-/* ... */
+.needsfixin {
+    background-color: pink;
+}
+
+/* Editor. */
 
 body.editor .container {
     width: 96%;
@@ -55,9 +56,25 @@ body.editor .container {
     margin-bottom: 4px;
 }
 
+.popover {
+    white-space: nowrap;
+    min-width: 120px;
+    max-width: none;
+}
+
+.glyphicon-ring {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid gold;
+  color: white;
+  display: inline-table;
+  text-align: center;
+}
+
 #editor { 
     position: absolute;
-    top: 55px;
+    top: 58px;
     left: 0px;
     bottom: 0px;
     right: 50%;
@@ -65,9 +82,16 @@ body.editor .container {
     border-right: solid 1px #158cba;
 }
 
+#editor.full {
+    right: 100%;
+    width: 100%;
+    border: none;
+}
+
+
 #preview {
     position: absolute;
-    top: 55px;
+    top: 58px;
     left: 50%;
     bottom: 0px;
     right: 0px;
@@ -83,7 +107,7 @@ body.editor .container {
     max-width: 100%;
 }
 
-/* ... */
+/* Navbar tweaks. */
 
 .navbar-inverse {
     background-color: #158cba;
@@ -102,6 +126,6 @@ body.editor .container {
     text-decoration: none;
 }
 
-#tb-ws {
-    margin-left: 1em;
+#tb-ws, #tb-preview {
+    margin-left: 0.8em;
 }

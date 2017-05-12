@@ -1,19 +1,29 @@
-﻿@model Odie.Models.ViewModels.ProjectViewModel
+﻿@using Microsoft.AspNetCore.Identity
+@using Odie.Models.Entities
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@model Odie.Models.ViewModels.FilesPageViewModel
 
 <h2>
-    @Html.DisplayFor(modelItem => Model.Name)
+    @Html.DisplayFor(modelItem => Model.Project.Name)
     <small>
-        @Html.DisplayFor(modelItem => Model.CreatedByUser.Name)
-        @Html.DisplayFor(modelItem => Model.CreatedDate)
+        @Html.DisplayFor(modelItem => Model.Project.CreatedDate)
+        @if (@Model.Project.CreatedByUserID != @UserManager.GetUserId(User)) {
+        <span class="label label-warning other" title="This project is owned by another user.">
+            @Html.DisplayFor(modelItem => Model.Project.CreatedByUser.Name)
+        </span> 
+        }
     </small>
     <button class="btn btn-success pull-right" data-toggle="modal" data-target="#newFileModal"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> New File</button>
 </h2>
 
-<p class="sharedWith sharedWith@(@Model.ID)">
+<p class="sharedWith sharedWith@(@Model.Project.ID)">
     <span class="text-muted">Shared with:</span>
-    @if(@Model.SharedWith.Any()) {
+    @if(@Model.Project.SharedWith.Any()) {
         <span class="sharing">
-        @Html.Raw(string.Join(", ", @Model.SharedWith.Select(s => s.Name)))
+        @Html.Raw(string.Join(", ", @Model.Project.SharedWith.Select(s => s.Name)))
         </span>
     }
     else
@@ -21,6 +31,17 @@
         <span class="sharing"><em>None.</em></span>
     }
 </p>
+
+@if (@Model.Notice.MessageID != 0) {
+    <div class="alert @(@Model.Notice.MessageID > 0 ? "alert-info" : "alert-warning") alert-dismissible fade in" role=alert>
+        <button type=button class=close data-dismiss=alert aria-label=Close><span aria-hidden=true>&times;</span></button>
+        <strong>
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Notice:</span>
+        </strong>
+        @Model.Notice.Message
+    </div>
+}
 
 <h4>File Listing</h4>
 
@@ -30,22 +51,22 @@
             <th class="text-right" data-sort="int">#</th>
             <th class="col-sm-6 text-left" data-sort="string">Name</th>
             <th class="col-sm-2 text-right" data-sort="int">Created By</th>
-            <th class="col-sm-2 text-right" data-sort="int">Modified</th>
+            <th class="col-sm-2 text-right" data-sort="int">Created</th>
             <th class="col-sm-2 text-right" data-sort="int">Action</th>
         </tr>
     </thead>
     <tfoot>
         <tr>
             <td colspan="5">
-                <small class="pull-left text-muted">Project contains @Model.Files.Count() files.</small>
+                <small class="pull-left text-muted">Project contains @Model.Project.Files.Count() files.</small>
             </td>
         </tr>
     </tfoot>
     <tbody>
     @{int i = 0;}
-    @foreach (var file in Model.Files) {
+    @foreach (var file in Model.Project.Files) {
         i++;
-        <tr class="file@(file.ID)">
+        <tr class="file@(file.ID)@(Model.Notice.NewID == file.ID ? " highlight" : "")">
             <td class="text-muted text-righ">@i</td>
             <td class="text-left">
                 <span>@Html.DisplayFor(modelItem => file.Name)</span>
@@ -65,7 +86,7 @@
 </table>
 
 <div class="modal fade" id="newFileModal" tabindex="-1" role="dialog" aria-labelledby="newFileModalLabel">
-    <form id="createFile" asp-area="" asp-controller="Files" asp-action="Create" asp-route-id="@Model.ID" method="post">
+    <form id="createFile" asp-area="" asp-controller="Files" asp-action="Create" asp-route-id="@Model.Project.ID" method="post">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -110,7 +131,7 @@
 
                 clearTimeout(timer);
                 timer = setTimeout(function () {
-                    $.post("/Files/ValidateName/@Model.ID", {'name': $('#name-field').val()})
+                    $.post("/Files/ValidateName/@Model.Project.ID", {'name': $('#name-field').val()})
                         .done(function (r) {
                             if (r.success != true) {
                                 $('.name-row').addClass('has-error');
@@ -124,7 +145,7 @@
 
             $(document).on("click", ".createFile", function (e) {
                 e.preventDefault();
-                $.post("/Files/ValidateName/@Model.ID", {'name': $('#name-field').val()})
+                $.post("/Files/ValidateName/@Model.Project.ID", {'name': $('#name-field').val()})
                     .done(function (r) {
                         if (r.success == true) {
                             $('#createFile').submit();
@@ -132,7 +153,7 @@
                             $('.name-row').addClass('has-error');
                             $('.name-row .help-block').text(r.error);
                         }
-                });
+                    });
             });
 
 
@@ -144,7 +165,7 @@
             p.find('.updateName').removeClass('hidden');
 
             var span = p.find('span').first();
-            var spanWidth = (span.outerWidth(true) + 10) + 'px';
+            var spanWidth = (Math.max(span.outerWidth(true) + 10), 150) + 'px';
             var input = $('<input />', {
                 'type': 'text',
                 'value': span.text()
@@ -161,20 +182,42 @@
             var pid = $(this).attr('data-pid');
             var p = $('.file' + pid);
 
-            p.find('.updateName').prop('disabled', true);
-
             var input = p.find('input').first();
             var name = input.val();
 
-            if (name != input.prop("defaultValue")) {
-                $.post("/Files/Rename/" + pid, {'name': name});
+            if (name === "") {
+                input.addClass('needsfixin').focus().delay(500).queue(function () {
+                    $(this).removeClass("needsfixin").dequeue();
+                });
+                return;
             }
 
-            var span = $('<span>' + name + '</span>');
-            input.replaceWith(span);
+            p.find('.updateName').prop('disabled', true);
 
-            p.find('.updateName').prop('disabled', false).addClass('hidden');
-            p.find('.editName').removeClass('hidden');
+            if (name != input.prop("defaultValue")) {
+                $.post("/Files/Rename/" + pid, {'name': name})
+                    .done(function (r) {
+                        if (r.success == true) {
+                            var span = $('<span>' + name + '</span>');
+                            input.replaceWith(span);
+
+                            p.find('.updateName').prop('disabled', false).addClass('hidden');
+                            p.find('.editName').removeClass('hidden');
+                        } else {
+                            p.find('.updateName').prop('disabled', false);
+                            input.addClass('needsfixin').focus().delay(500).queue(function () {
+                                $(this).removeClass("needsfixin").dequeue();
+                            });
+                        }
+                    });
+            }
+        });
+
+        $(document).ready(function () {
+            setTimeout(function () {
+                $('.alert').alert('close');
+                $('.highlight').removeClass('highlight');
+            }, 3000);
         });
 
         });

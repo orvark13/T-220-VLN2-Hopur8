@@ -41,20 +41,18 @@ namespace Odie.Controllers
             };
 
             if (msg != null) {
-                viewModel.Notice = new NoticeViewModel() {
-                    MessageID = msg ?? 0
-                };
+                viewModel.Notice.MessageID = msg ?? 0;
 
                 switch (msg)
                 {
                     case -1:
-                        viewModel.Notice.Message = "Failed to create new project.";
+                        viewModel.Notice.Message = "Failed to create new file.";
                         break;
                     case 1:
-                        viewModel.Notice.Message = "New project successfully created.";
+                        viewModel.Notice.Message = "New file has been added.";
                         break;
                     case 2:
-                        viewModel.Notice.Message = "Project has been deleted.";
+                        viewModel.Notice.Message = "File has been deleted.";
                         break;
                 }
 

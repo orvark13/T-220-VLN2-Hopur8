@@ -27,18 +27,42 @@ namespace Odie.Controllers
             _filesService = filesService;
         }
 
-        public IActionResult Index(int? id)
+        public IActionResult Index(int? id, int? msg, int? hl)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
 
-            var viewModel = _projectsService.GetProjectByID(id ?? -1);
+            var project = _projectsService.GetProjectByID(id ?? -1);
 
-            if (viewModel == null)
+            if (project == null)
             {
                 return NotFound();
+            }
+
+            var viewModel = new FilesPageViewModel() {
+                Project = project,
+                Notice = new NoticeViewModel()
+            };
+
+            if (msg != null) {
+                viewModel.Notice.MessageID = msg ?? 0;
+
+                switch (msg)
+                {
+                    case -1:
+                        viewModel.Notice.Message = "Failed to create new project.";
+                        break;
+                    case 1:
+                        viewModel.Notice.Message = "New project successfully created.";
+                        break;
+                    case 2:
+                        viewModel.Notice.Message = "Project has been deleted.";
+                        break;
+                }
+
+                viewModel.Notice.NewID = hl ?? -1;
             }
 
             if (_projectsService.HasAccessToProject(_userManager.GetUserId(User), id ?? -1)) {
@@ -84,17 +108,31 @@ namespace Odie.Controllers
         }
 
         [HttpPost]
+        /// <summary>
+        /// Post method to rename a file node.
+        /// </summary>
+        /// <parameter name="id">File node ID.</parameter>
+        /// <parameter name="name">Files new name.</parameter>
         public IActionResult Rename(int id, string name)
         {
-            if (_projectsService.HasAccessToFile(_userManager.GetUserId(User), id)) {
+            if (_projectsService.HasAccessToFile(_userManager.GetUserId(User), id))
+            {
+                var projectID = _filesService.GetFilesProjectID(id);
 
-                if (_filesService.UpdateName(id, name))
+                if (_filesService.IsNameUnique(projectID, name))
                 {
-                    return Json(new { success = true});
+                    if (_filesService.UpdateName(id, name))
+                    {
+                        return Json(new { success = true});
+                    }
+                    else
+                    {
+                        return Json(new { success = false, error = "Rename failed."});
+                    }
                 }
                 else
                 {
-                    return Json(new { success = false, error = "Rename failed."});
+                    return Json(new { success = false, error = "Rename failed! An existing project file already has that name."});
                 }
             }
             else
@@ -104,6 +142,11 @@ namespace Odie.Controllers
         }
 
         [HttpPost]
+        /// <summary>
+        /// Post method to validate a name for a possible new file node in a project.
+        /// </summary>
+        /// <parameter name="id">Project ID.</parameter>
+        /// <parameter name="name">Files new name.</parameter>
         public IActionResult ValidateName(int id, string name)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -121,6 +164,10 @@ namespace Odie.Controllers
             }
         }
 
+        /// <summary>
+        /// Post method to delete a file node.
+        /// </summary>
+        /// <parameter name="id">File node ID.</parameter>
         public IActionResult Delete(int? id)
         {
             if (id == null || id == 0)
@@ -139,6 +186,11 @@ namespace Odie.Controllers
             }
         }
 
+        /// <summary>
+        /// Editor page.
+        /// </summary>
+        /// <parameter name="id">File node ID.</parameter>
+        /// <parameter name="rev">File revision ID.</parameter>
         public IActionResult Editor(int? id, int? rev)
         {
             if (id == null || id == 0)
@@ -160,6 +212,12 @@ namespace Odie.Controllers
             }
         }
 
+        /// <summary>
+        /// Update the contents of a file revision.
+        /// </summary>
+        /// <parameter name="nodeID">File node ID.</parameter>
+        /// <parameter name="fileRevisionID">File revision ID.</parameter>
+        /// <parameter name="contents">New revision contents.</parameter>
         public void SaveRevision(int nodeID, int fileRevisionID, string contents)
         {
             // FIXME: Only updating the current revision for now.

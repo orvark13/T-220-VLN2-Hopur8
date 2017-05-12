@@ -1,5 +1,10 @@
 @using Odie.Models.ViewModels
 @using Odie.Models
+@using Microsoft.AspNetCore.Identity
+@using Odie.Models.Entities
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 @model EditorViewModel
 
@@ -14,8 +19,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.6.4/showdown.min.js"></script>
     <script>
         $(document).ready(function () {
+
+            /* Editor */
+
             var dirty = false;
             var wsChange = false;
+            var userID = "@UserManager.GetUserId(User)";
+            var userName = "@UserManager.GetUserName(User)";
 
             var editor = ace.edit("editor");
             editor.setTheme("ace/theme/solarized_light");
@@ -29,7 +39,7 @@
                 var html = converter.makeHtml(source);
                 $('#preview').html(html);
                 dirty = true;
-                $('#tb-save').removeClass('btn-success').addClass('btn-warning');
+                $('#tb-save').removeClass('btn-primary').addClass('btn-warning');
             });
 
             $('#preview').html(converter.makeHtml(editor.getSession().getValue()));
@@ -39,6 +49,7 @@
                     e.preventDefault();
                 } 
             });
+
             $('#tb-save').on('click', function () {
                 if (dirty) {
                 $.post("/Files/SaveRevision/", {
@@ -47,12 +58,25 @@
                         'contents': editor.getSession().getValue()
                     })
                     .done(function (r) {
-                        $('#tb-save').removeClass('btn-warning').addClass('btn-success');
+                        $('#tb-save').removeClass('btn-warning').addClass('btn-primary');
                         dirty = false;
+
+                        if (webSocket && webSocket.readyState == WebSocket.OPEN) {
+                            var package = JSON.stringify({"doc": "@(Model.File.ID):@(Model.FileRevision.ID)", "guid": guid, "act": "save", "user": userName});
+                            webSocket.send(package);
+                        }
+
                     });
                 }
             });
 
+            $("#tb-preview").click(function () {
+                $("#editor").toggleClass("full");
+                $("#preview").toggleClass("hidden");
+                $(this).find('span').toggleClass("glyphicon glyphicon-eye-open").toggleClass("glyphicon glyphicon-eye-close");
+            });
+
+            /* WebSockets */
 
             var wsIconTimer;
             function setWsIcon(up) {
@@ -69,69 +93,93 @@
                 }, 100);
             }
 
+            function newWebSocket(onOpen, onMessage, onError, onClose) {
+                var webSocket = new WebSocket("ws://localhost:5000"); /* FIXME, endpoint hardcoded! */
+                webSocket.onopen = onOpen;
+                webSocket.onmessage = onMessage;
+                webSocket.onerror = onError;
+                webSocket.onclose = onClose;
+                return webSocket;
+            }
 
-            var webSocket = new WebSocket("ws://localhost:5000");
             var guid = odie.helpers.generateGuid();
             var docrev = "@(Model.File.ID):@(Model.FileRevision.ID)";
-            webSocket.onopen = function () {
+
+            var wsOnOpen = function () {
                 $("#tb-ws").removeClass('btn-warning').addClass('btn-success').removeClass('btn-danger');
-                $("#tb-ws").attr("title", "Connected");
+                odie.ui.pop($("#tb-ws"), "Connected to server.");
 
                 if (webSocket.readyState == WebSocket.OPEN) {
-                    var package = JSON.stringify({"doc": "@(Model.File.ID):@(Model.FileRevision.ID)", "guid": guid, "act": "msg", "msg": "Hello World"});
+                    var package = JSON.stringify({"doc": "@(Model.File.ID):@(Model.FileRevision.ID)", "guid": guid, "act": "join", "user": userName});
                     webSocket.send(package);
                 }
             };
-            webSocket.onmessage = function (e) {
+
+            var wsOnMessage = function (e) {
+                var r = JSON.parse(e.data);
+
+                /* Ignore messages originating from myself
+                   and not concerning the current document. */
+                if (r.guid === guid || r.doc !== docrev) {
+                    return;
+                }
+
                 setWsIcon(false);
 
-                var r = JSON.parse(e.data);
-                console.log(r);
                 switch (r.act) {
                     case "msg":
-                        console.log("Message: " + r.msg);
+                        odie.ui.pop($("#tb-users"), r.user + ": " + r.msg);
                         break;
                     case "change":
-                        if (r.doc == docrev && r.guid !== guid) {
-                            wsChange = true;
-                            editor.getSession().getDocument().applyDeltas([r.delta]);
-                            wsChange = false;
-                        } else {
-                            console.log("Ignoring: my own delta or edit for a different document.");
-                        }
+                        wsChange = true;
+                        editor.getSession().getDocument().applyDeltas([r.delta]);
+                        wsChange = false;
                         break;
-                    case "cls":
-                        editor.setValue("");
+                    case "join":
+                        odie.ui.pop($("#tb-users"), r.user + " has joined.");
+                        break;
+                    case "leave":
+                        odie.ui.pop($("#tb-users"), r.user + " has left.");
+                        break;
+                    case "save":
+                        odie.ui.pop($("#tb-users"), r.user + " just saved the document.");
+                        $('#tb-save').removeClass('btn-warning').addClass('btn-primary');
+                        dirty = false;
                         break;
                 }
-            };
-            webSocket.onerror = function (e) {
-                $("#tb-ws").addClass('btn-warning').removeClass('btn-success').removeClass('btn-danger');
-                console.log('ws-error: ' + e.message);
-            };
-            webSocket.onclose = function () {
-                $("#tb-ws").removeClass('btn-warning').removeClass('btn-success').addClass('btn-danger');
-                $("#tb-ws").attr("title", "Disconnected");
             };
 
-            window.beforeunload = function () {
-                if (webSocket.readyState == WebSocket.OPEN) {
-                    var package = JSON.stringify({"doc": "@(Model.File.ID):@(Model.FileRevision.ID)", "guid": guid, "act": "msg", "msg": "Goodbye World"});
+            var wsOnError = function (e) {
+                $("#tb-ws").addClass('btn-warning').removeClass('btn-success').removeClass('btn-danger');
+                odie.ui.pop($("#tb-ws"), "Websocket error: " + e.message);
+            };
+
+            var wsOnClose = function () {
+                $("#tb-ws").removeClass('btn-warning').removeClass('btn-success').addClass('btn-danger');
+                odie.ui.pop($("#tb-ws"), "Disconnected from server.");
+            };
+
+            var webSocket = newWebSocket(wsOnOpen, wsOnMessage, wsOnError, wsOnClose);
+
+            window.onbeforeunload = function () {
+                if (webSocket.readyState != WebSocket.CLOSED) {
+                    var package = JSON.stringify({"doc": "@(Model.File.ID):@(Model.FileRevision.ID)", "guid": guid, "act": "leave", "user": userName});
                     webSocket.send(package);
                 }
-            };
-            window.unload = function () {
-                webSocket.onclose = null;
                 webSocket.close();
             };
 
             $("#tb-ws").click(function () {
-                console.log(webSocket);
                 if (webSocket.readyState == WebSocket.OPEN) {
+                    /* User closes connection manually. */
+                    if (webSocket.readyState != WebSocket.CLOSED) {
+                        var package = JSON.stringify({"doc": "@(Model.File.ID):@(Model.FileRevision.ID)", "guid": guid, "act": "leave", "user": userName});
+                        webSocket.send(package);
+                    }
                     webSocket.close();
                 } else {
-                    webSocket = new WebSocket("ws://localhost:5000");
-                    // TODO reset event handlers
+                    /* User opens connection again manually. */
+                    webSocket = newWebSocket(wsOnOpen, wsOnMessage, wsOnError, wsOnClose);
                 }
             });
 
@@ -139,13 +187,12 @@
                 if (wsChange == false) {
                     if (webSocket.readyState == WebSocket.OPEN) {
                         setWsIcon(true)
-
                         var package = JSON.stringify({"doc": "@(Model.File.ID):@(Model.FileRevision.ID)", "guid": guid, "act": "change", "delta": e});
                         webSocket.send(package);
-
                     } else {
-                        $("#tb-ws").attr("title", "Connection closed");
-                        // TODO fix the connection!
+                        /* Connection error detected. */
+                        odie.ui.pop($("#tb-ws"), "Connection closed.");
+                        webSocket = newWebSocket(wsOnOpen, wsOnMessage, wsOnError, wsOnClose);
                     }
                 }
             });
