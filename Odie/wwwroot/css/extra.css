@@ -3,11 +3,13 @@ h4.list-group-item-heading {
     line-height: 1.7em;
 }
 
-div.list-group-item button {
+div.list-group-item button,
+tr button {
     display: none !important;
 }
 
-div.list-group-item:hover button:not(.hidden) {
+div.list-group-item:hover button:not(.hidden),
+tr:hover button:not(.hidden) {
     display: inline-block !important;
 }
 

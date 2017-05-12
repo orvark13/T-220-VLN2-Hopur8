@@ -13,9 +13,7 @@
     <span class="text-muted">Shared with:</span>
     @if(@Model.SharedWith.Any()) {
         <span class="sharing">
-        @foreach (var user in @Model.SharedWith) {
-            <span class="select2-selection__choice">@Html.DisplayFor(modelItem => user.Name)</span>
-        }
+        @Html.Raw(string.Join(", ", @Model.SharedWith.Select(s => s.Name)))
         </span>
     }
     else
@@ -47,9 +45,14 @@
     @{int i = 0;}
     @foreach (var file in Model.Files) {
         i++;
-        <tr>
+        <tr class="file@(file.ID)">
             <td class="text-muted text-righ">@i</td>
-            <td class="text-left">@Html.DisplayFor(modelItem => file.Name)</td>
+            <td class="text-left">
+                <span>@Html.DisplayFor(modelItem => file.Name)</span>
+                <button class="editName btn btn-xs" data-pid="@file.ID"><span class="glyphicon glyphicon-pencil
+    "></span></button>
+                <button class="updateName btn btn-primary btn-xs hidden" data-pid="@file.ID">OK</button>
+            </td>
             <td class="text-right">@Html.DisplayFor(modelItem => file.CreatedByUser.Name)</td>
             <td class="text-right">@Html.DisplayFor(modelItem => file.CreatedDate)</td>
             <td class="text-right">
@@ -58,11 +61,11 @@
             </td>
         </tr>
     }
-    </tbody>                          
+    </tbody>
 </table>
 
 <div class="modal fade" id="newFileModal" tabindex="-1" role="dialog" aria-labelledby="newFileModalLabel">
-    <form id="createFile" asp-area="" asp-controller="Files" asp-action="Post" asp-route-id="@Model.ID" method="post">
+    <form id="createFile" asp-area="" asp-controller="Files" asp-action="Create" asp-route-id="@Model.ID" method="post">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -131,6 +134,49 @@
                         }
                 });
             });
+
+
+        $(document).on("click", ".editName", function () {
+            var pid = $(this).attr('data-pid');
+            var p = $('.file' + pid);
+
+            p.find('.editName').addClass('hidden');
+            p.find('.updateName').removeClass('hidden');
+
+            var span = p.find('span').first();
+            var spanWidth = (span.outerWidth(true) + 10) + 'px';
+            var input = $('<input />', {
+                'type': 'text',
+                'value': span.text()
+            });
+            span.replaceWith(input);
+            input.outerWidth(spanWidth);
+            input.focus().select();
+            input.blur(function () {
+                p.find('.updateName').trigger('click');
+            });
+        });
+
+        $(document).on("click", ".updateName", function () {
+            var pid = $(this).attr('data-pid');
+            var p = $('.file' + pid);
+
+            p.find('.updateName').prop('disabled', true);
+
+            var input = p.find('input').first();
+            var name = input.val();
+
+            if (name != input.prop("defaultValue")) {
+                $.post("/Files/Rename/" + pid, {'name': name});
+            }
+
+            var span = $('<span>' + name + '</span>');
+            input.replaceWith(span);
+
+            p.find('.updateName').prop('disabled', false).addClass('hidden');
+            p.find('.editName').removeClass('hidden');
+        });
+
         });
     </script>
 }

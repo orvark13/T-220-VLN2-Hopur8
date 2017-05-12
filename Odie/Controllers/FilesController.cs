@@ -51,16 +51,17 @@ namespace Odie.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post(int id, string name, string open = "on")
+        public IActionResult Create(int id, string name, string open)
         {
-            // /Files/Post/pID => new file in project
+            // /Files/Create/pID => new file in project
             var currentUserID = _userManager.GetUserId(User);
 
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name)
+                || !_filesService.IsNameUnique(id, name))
             {
                 name = "NN.md";
             }
-            var nodeID = _filesService.Create(name, id, currentUserID, "");
+            var nodeID = _filesService.Create(name, id, currentUserID, "# " + name + "\n\n");
 
             if (open == "on" && nodeID > 0)
             {
@@ -79,6 +80,26 @@ namespace Odie.Controllers
                     // Showing error.
                     return RedirectToAction(nameof(FilesController.Index), "Files", new {id = id, msg = -1});
                 }
+            }
+        }
+
+        [HttpPost]
+        public IActionResult Rename(int id, string name)
+        {
+            if (_projectsService.HasAccessToFile(_userManager.GetUserId(User), id)) {
+
+                if (_filesService.UpdateName(id, name))
+                {
+                    return Json(new { success = true});
+                }
+                else
+                {
+                    return Json(new { success = false, error = "Rename failed."});
+                }
+            }
+            else
+            {
+                return Json(new { success = false, error = "Access denied!"});
             }
         }
 
@@ -143,7 +164,9 @@ namespace Odie.Controllers
         {
             // FIXME: Only updating the current revision for now.
             // Will be changed when implementation of revision functionaly is finished.
-            _filesService.UpdateFileRevision(fileRevisionID, contents);
+            if (_projectsService.HasAccessToFile(_userManager.GetUserId(User), nodeID)) {
+                _filesService.UpdateFileRevision(fileRevisionID, contents);
+            }
         }
 
         [AllowAnonymous]
