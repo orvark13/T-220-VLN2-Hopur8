@@ -151,7 +151,7 @@
 
             var wsOnError = function (e) {
                 $("#tb-ws").addClass('btn-warning').removeClass('btn-success').removeClass('btn-danger');
-                odie.ui.pop($("#tb-ws"), "Websocket error: " + e.message);
+                odie.ui.pop($("#tb-ws"), "Websocket error code: " + e.code);
             };
 
             var wsOnClose = function () {
