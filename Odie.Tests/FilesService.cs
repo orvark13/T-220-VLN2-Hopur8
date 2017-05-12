@@ -2,7 +2,7 @@ using Xunit;
 using System;
 using Odie.Services;
 using Odie.Data;
-using Odie.Models;
+using Odie.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;

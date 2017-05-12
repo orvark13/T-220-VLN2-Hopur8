@@ -11,6 +11,7 @@ Written in [.NET Core 1.1](https://www.microsoft.com/net/core) in [VS Code](http
 ~~~~
 cd Odie
 dotnet restore
+dotnet build
 dotnet run
 ~~~~
 
