@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Odie.Models;
+using Odie.Models.Entities;
 using Odie.Models.ManageViewModels;
 using Odie.Services;
 

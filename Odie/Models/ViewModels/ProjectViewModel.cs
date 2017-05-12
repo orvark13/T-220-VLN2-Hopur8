@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace Odie.Models
+namespace Odie.Models.ViewModels
 {
     public class ProjectViewModel
     {
@@ -24,6 +22,9 @@ namespace Odie.Models
         public IEnumerable<FileViewModel> Files { get; set; }
     }
 
+    /// <summary>
+    /// Holds a summary project data for use in lists in views.
+    /// </summary>
     public class ProjectListingViewModel
     {
         //TODO
@@ -38,6 +39,9 @@ namespace Odie.Models
         public IEnumerable<UserViewModel> SharedWith { get; set; }
     }
 
+    /// <summary>
+    /// Holds all the neccessary for a single project to use in a view.
+    /// </summary>
     public class ProjectsPageViewModel
     {
         // TODO

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Odie.Data;
-using Odie.Models;
+using Odie.Models.Entities;
 using Odie.Services;
 using Odie.Middlewares;
 

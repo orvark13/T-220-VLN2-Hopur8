@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Odie.Models; // ApplicationUser
+using Odie.Models;
+using Odie.Models.Entities;
+using Odie.Models.ViewModels;
 using Odie.Data;
 using Odie.Services;
 using Microsoft.AspNetCore.Identity;

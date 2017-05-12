@@ -1,4 +1,7 @@
-@model Odie.Models.EditorViewModel
+@using Odie.Models.ViewModels
+@using Odie.Models
+
+@model EditorViewModel
 
 <div id="editor">@Html.Raw(Model.FileRevision.Contents)</div>
 <div id="preview"></div>

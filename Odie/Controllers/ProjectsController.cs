@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Odie.Models; // ApplicationUser
+using Odie.Models.Entities;
+using Odie.Models.ViewModels;
 using Odie.Data;
 using Odie.Services;
 using Microsoft.AspNetCore.Identity;
@@ -12,14 +13,14 @@ using Microsoft.AspNetCore.Identity;
 namespace Odie.Controllers
 {
     [Authorize]
-    public class HomeController : Controller
+    public class ProjectsController : Controller
     {
         private UserManager<ApplicationUser> _userManager;
         private ProjectsService _projectsService;
         private FilesService _filesService;
         private UsersService _usersService;
 
-        public HomeController(ProjectsService projectsService, FilesService filesService, UsersService usersService, UserManager<ApplicationUser> userManager)
+        public ProjectsController(ProjectsService projectsService, FilesService filesService, UsersService usersService, UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
             _projectsService = projectsService;
@@ -77,11 +78,11 @@ namespace Odie.Controllers
 
             if (projectID > 0)
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = 1, newID = projectID});
+                return RedirectToAction(nameof(ProjectsController.Index), "Projects", new { msg = 1, newID = projectID});
             }
             else
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = -1});
+                return RedirectToAction(nameof(ProjectsController.Index), "Projects", new { msg = -1});
             }
         }
 
@@ -150,7 +151,7 @@ namespace Odie.Controllers
 
             if (_projectsService.HasAccessToProject(_userManager.GetUserId(User), id ?? -1)) {
                 _projectsService.DeleteProjectByID(id ?? -1);
-                return RedirectToAction(nameof(HomeController.Index), "Home", new { msg = 2});
+                return RedirectToAction(nameof(ProjectsController.Index), "Projects", new { msg = 2});
             }
             else
             {

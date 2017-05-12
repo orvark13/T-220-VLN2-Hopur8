@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Odie.Models;
 using Odie.Models.Entities;
+using Odie.Models.ViewModels;
 using Odie.Data;
 
 namespace Odie.Services

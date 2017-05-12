@@ -1,17 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Odie.Models;
 
-namespace Odie.Models
+namespace Odie.Models.ViewModels
 {
+    /// <summary>
+    /// Holds a revision version of af file node.
+    /// </summary>
     public class FileRevisionViewModel
     {
-        /// <summary>
-        /// TODO
-        /// </summary>
         public int ID { get; set; }
 
         public int NodeID { get; set; }
@@ -20,7 +15,7 @@ namespace Odie.Models
 
         public string Contents { get; set; }
 
-        public string CreatedByUserID { get; set; } // CreatedBy
+        public string CreatedByUserID { get; set; }
 
         public DateTime CreatedDate { get; set; }
     }
